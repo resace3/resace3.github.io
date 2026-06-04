@@ -63,3 +63,11 @@ def test_static_pages_reference_existing_internal_links():
             if resolved is None:
                 continue
             assert resolved.exists(), f"{page.name} links to missing page {link}"
+
+
+def test_static_causal_dag_snapshot_intercepts_backend_histogram_calls():
+    html = (ROOT / "causal-dag.html").read_text(encoding="utf-8")
+
+    assert "window.personalWebsiteStaticDag = true" in html
+    assert 'url.pathname === "/dag/node-histogram"' in html
+    assert "input instanceof URL" in html

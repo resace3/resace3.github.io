@@ -19,6 +19,136 @@
     <script>
       window.entitySearchUrl = "/entities/search";
     </script>
+    <script>
+      window.personalWebsiteStaticDag = true;
+      (() => {
+        const originalFetch = window.fetch.bind(window);
+        const histogramDefaults = {
+          "sensor.nick_r_sleep_minutes_asleep": {
+            minimum: 335,
+            maximum: 502,
+            mean: 421.4,
+            median: 419,
+            std_dev: 34.2,
+            aggregation: "last",
+            day_lag: 1,
+            bins: [
+              [335, 359, 4],
+              [360, 384, 8],
+              [385, 409, 15],
+              [410, 434, 24],
+              [435, 459, 20],
+              [460, 484, 13],
+              [485, 502, 6]
+            ],
+            values: [352, 371, 390, 398, 407, 414, 419, 422, 427, 436, 445, 456, 468, 491]
+          },
+          "sensor.nick_r_steps": {
+            minimum: 4210,
+            maximum: 11280,
+            mean: 7920,
+            median: 8060,
+            std_dev: 1460,
+            aggregation: "max",
+            day_lag: 1,
+            bins: [
+              [4210, 5200, 5],
+              [5200, 6190, 9],
+              [6190, 7180, 14],
+              [7180, 8170, 21],
+              [8170, 9160, 19],
+              [9160, 10150, 15],
+              [10150, 11280, 7]
+            ],
+            values: [4450, 5380, 6120, 6840, 7310, 7760, 8120, 8460, 8910, 9340, 9820, 10420, 10980]
+          },
+          "sensor.nick_r_mood_score": {
+            minimum: 3.8,
+            maximum: 8.2,
+            mean: 5.9,
+            median: 5.8,
+            std_dev: 0.86,
+            aggregation: "last",
+            day_lag: 0,
+            bins: [
+              [3.8, 4.4, 5],
+              [4.4, 5.0, 12],
+              [5.0, 5.6, 18],
+              [5.6, 6.2, 24],
+              [6.2, 6.8, 17],
+              [6.8, 7.4, 10],
+              [7.4, 8.2, 4]
+            ],
+            values: [4.0, 4.6, 5.0, 5.3, 5.6, 5.8, 6.0, 6.2, 6.5, 6.9, 7.3, 8.0]
+          }
+        };
+
+        function histogramResponse(url) {
+          const sensor = url.searchParams.get("sensor") || "sensor.nick_r_sleep_minutes_asleep";
+          const data = histogramDefaults[sensor] || histogramDefaults["sensor.nick_r_sleep_minutes_asleep"];
+          return {
+            ok: true,
+            sensor,
+            rows: 90,
+            requested_days: Number(url.searchParams.get("analysis_window_days")) || 90,
+            aggregation: url.searchParams.get("aggregation") || data.aggregation,
+            day_lag: Number(url.searchParams.get("day_lag")) || data.day_lag,
+            minimum: data.minimum,
+            maximum: data.maximum,
+            mean: data.mean,
+            median: data.median,
+            std_dev: data.std_dev,
+            bins: data.bins.map(([lower, upper, count]) => ({
+              lower,
+              upper,
+              count,
+              label: `${lower}-${upper}`
+            })),
+            values: data.values
+          };
+        }
+
+        window.fetch = (input, init) => {
+          const requestUrl =
+            typeof input === "string"
+              ? input
+              : input instanceof URL
+                ? input.href
+                : input?.url || String(input || "");
+          const url = new URL(requestUrl || "", window.location.href);
+
+          if (url.pathname === "/dag/node-histogram") {
+            return Promise.resolve(new Response(JSON.stringify(histogramResponse(url)), {
+              status: 200,
+              headers: { "Content-Type": "application/json" }
+            }));
+          }
+
+          if (url.pathname === "/dag/autosave" || url.pathname === "/settings/autosave") {
+            return Promise.resolve(new Response(JSON.stringify({ ok: true, static: true }), {
+              status: 200,
+              headers: { "Content-Type": "application/json" }
+            }));
+          }
+
+          if (url.pathname === "/entities/search") {
+            return Promise.resolve(new Response(JSON.stringify({ ok: true, entities: [] }), {
+              status: 200,
+              headers: { "Content-Type": "application/json" }
+            }));
+          }
+
+          if (url.pathname === "/run") {
+            return Promise.resolve(new Response(document.documentElement.outerHTML, {
+              status: 200,
+              headers: { "Content-Type": "text/html" }
+            }));
+          }
+
+          return originalFetch(input, init);
+        };
+      })();
+    </script>
     <script defer src="sleep_causal_app/static/app.js"></script>
   </head>
   <body>
