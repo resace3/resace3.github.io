@@ -11,8 +11,8 @@ The repository is published from `main` through GitHub Pages at `resace3.github.
 
 - `index.html`, `new-projects.html`, `agentic-prompt.html`: public site pages
 - `style.css`, `agentic-prompt.css`, `script.js`: site styling and page transitions
-- `causal-dag.html`: static GitHub Pages preview for the Causal DAG Builder
-- `sleep_causal_app/`: copied Flask app used for the full local Causal DAG Builder demo
+- `causal-dag.html`: static GitHub Pages snapshot of the Causal DAG Builder UI
+- `sleep_causal_app/`: copied Flask app used for the full local Causal DAG Builder demo and the static page assets
 - `run_sleep_causal_copy.py`: starts the copied Flask app on `127.0.0.1:5051`
 - `dev_proxy.py`: serves the personal website on `0.0.0.0:8000` and proxies `/causal-dag.html` to the Flask app during local development
 - `.github/workflows/ci.yml`: GitHub Actions workflow for static, Python, and browser checks

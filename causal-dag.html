@@ -1,113 +1,564 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Causal DAG Builder preview by Nick Rezaee for mood, sleep, and steps causal reasoning.">
-  <title>Causal DAG Builder | Nick Rezaee</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="dag.css">
-</head>
-<body class="dag-page">
-  <header class="site-header">
-    <nav class="nav" aria-label="Primary navigation">
-      <div class="brand-group">
-        <a class="brand" href="index.html" aria-label="Nick Rezaee home">Nick Rezaee</a>
-        <a class="new-projects-badge" href="new-projects.html">New Projects</a>
-      </div>
-      <div class="nav-links">
-        <a href="index.html#experience">Experience</a>
-        <a href="index.html#skills">Skills</a>
-        <a href="index.html#contact">Contact</a>
-      </div>
-    </nav>
-  </header>
-
-  <main class="dag-shell">
-    <section class="dag-hero" aria-label="Causal DAG Builder preview">
-      <p class="section-kicker">Causal Inference Project</p>
-      <h1>Causal DAG Builder</h1>
-      <p>Static GitHub Pages preview of a simple mood-analysis DAG. The full local demo runs as a Flask app through the development proxy.</p>
-    </section>
-
-    <section class="dag-workspace" aria-label="Static causal DAG preview">
-      <aside class="dag-panel">
-        <div class="panel-section">
-          <p class="panel-label">Example Question</p>
-          <h2>How might sleep affect mood?</h2>
-          <p>Use a directed acyclic graph to make the assumed exposure, outcome, and confounder explicit before running a causal analysis.</p>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>N of 1 Causal Analysis Engine</title>
+    <link rel="stylesheet" href="sleep_causal_app/static/styles.css">
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [["\\(", "\\)"]],
+          displayMath: [["\\[", "\\]"]]
+        },
+        startup: {
+          typeset: false
+        }
+      };
+    </script>
+    <script>
+      window.entitySearchUrl = "/entities/search";
+    </script>
+    <script defer src="sleep_causal_app/static/app.js"></script>
+  </head>
+  <body>
+    <header class="personal-site-header">
+      <nav class="personal-site-nav" aria-label="Personal website navigation">
+        <div class="personal-brand-group">
+          <a class="personal-brand" href="/index.html" aria-label="Nick Rezaee home">Nick Rezaee</a>
+          <a class="personal-project-pill" href="/new-projects.html">New Projects</a>
         </div>
-
-        <div class="metric-grid">
+        <div class="personal-nav-links">
+          <a href="/index.html#experience">Experience</a>
+          <a href="/index.html#skills">Skills</a>
+          <a href="/index.html#contact">Contact</a>
+        </div>
+      </nav>
+    </header>
+    <header class="app-topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <span class="brand-mark">CAE</span>
           <div>
-            <span>Exposure</span>
-            <strong>Sleep duration</strong>
-          </div>
-          <div>
-            <span>Outcome</span>
-            <strong>Mood score</strong>
-          </div>
-          <div>
-            <span>Confounder</span>
-            <strong>Steps</strong>
-          </div>
-          <div>
-            <span>Data Mode</span>
-            <strong>Demo</strong>
+            <strong>N of 1 Causal Analysis Engine</strong>
+            <span>N-of-1 causal model</span>
           </div>
         </div>
+        <nav class="tabs" aria-label="Primary">
+          <a
+            class="tab active"
+            href="/causal-dag.html"
+            aria-current="page">
+            Analysis
+          </a>
+          <button class="tab guide-tab" type="button" data-onboarding-start>Guide me</button>
+        </nav>
+      </div>
+    </header>
+    <main class="shell">
+      
+        
+      
+      
 
-        <div class="panel-section">
-          <p class="panel-label">GitHub Pages</p>
-          <h3>Static preview</h3>
-          <p>GitHub Pages cannot run the Python Flask app, so this page provides a deploy-safe preview instead of a 404.</p>
+<section class="header title-header">
+  <div>
+    <h1>N of 1 Causal Analysis Engine</h1>
+  </div>
+</section>
+
+<form
+  method="post"
+  action="/dag/save"
+  class="dag-workbench"
+  data-dag-form
+  data-dag-autosave-url="/dag/autosave"
+  data-dag-histogram-url="/dag/node-histogram"
+  data-entity-search-url="/entities/search">
+  <section class="panel dag-canvas-panel workflow-section workflow-dag-section is-dag-collapsed">
+    <div class="panel-heading workflow-heading dag-workflow-heading">
+      <div>
+        <p class="workflow-step-label">Step 1</p>
+        <h2>
+          <button class="section-toggle" type="button" aria-expanded="false" aria-label="Expand causal DAG" title="Expand causal DAG" data-toggle-section="dag-section-body"></button>
+          Create your causal DAG
+        </h2>
+        <p class="muted">Build the causal structure, configure variables, and choose the history window before running an analysis.</p>
+      </div>
+      <div class="dag-header-controls">
+        <label class="dag-analysis-days">
+          <span>Number of days</span>
+          <input name="analysis_window_days" type="number" min="14" max="730" value="90" data-analysis-days>
+        </label>
+        <div class="dag-toolbar">
+          <button class="button small-button" type="button" data-dag-fit>Fit to screen</button>
+          <button class="button small-button" type="button" data-dag-add-node>Add box</button>
+          <button class="button small-button danger-button" type="button" data-dag-delete-selected disabled>Delete selected</button>
+          <span class="dag-selection-count" data-dag-selection-count>No selection</span>
+        </div>
+      </div>
+    </div>
+    <div class="dag-cycle-warning" data-dag-cycle-warning hidden>
+      This graph has a directed cycle. Causal DAGs must be acyclic, so remove one of the highlighted arrows before saving or running analysis.
+    </div>
+
+    <div id="dag-section-body" class="dag-tools-shell" data-section-body>
+    <div class="dag-editor-layout">
+      <aside class="dag-properties-sidebar" data-dag-properties-sidebar>
+        <span class="dag-sidebar-resize-handle" aria-hidden="true" data-sidebar-resize-handle></span>
+        <div class="dag-sidebar-topbar">
+          <strong>Properties</strong>
+        </div>
+        <div class="dag-properties-placeholder" data-dag-properties-placeholder>
+          <h3>Variable properties</h3>
+          <p>Select a variable to configure.</p>
+        </div>
+        <div class="dag-properties-panel" data-dag-properties-panel hidden>
+          <div class="dag-properties-header">
+            <h3 data-sidebar-title>Variable properties</h3>
+            <div class="sidebar-actions">
+              <button class="button small-button danger-button" type="button" data-sidebar-delete-node>Delete</button>
+            </div>
+          </div>
+          <div class="sidebar-tabs" role="tablist" aria-label="Variable configuration steps">
+            <button class="active" type="button" aria-expanded="true" data-sidebar-tab="definition"><span>1</span> Variable definition</button>
+            <button type="button" aria-expanded="false" data-sidebar-tab="preparation"><span>2</span> Data preparation</button>
+            <button type="button" aria-expanded="false" data-sidebar-tab="advanced"><span>3</span> Show histogram</button>
+          </div>
+          <div class="sidebar-tab-panel" data-sidebar-panel="definition">
+            <h4>Variable definition</h4>
+            <p class="muted">Start here: define what this variable is, where it comes from, and when it is measured.</p>
+            <label>
+              Variable name
+              <input autocomplete="off" data-sidebar-field="node_label">
+            </label>
+            <label>
+              Sensor mapping
+              <input list="dag-sensor-options" autocomplete="off" data-sidebar-field="node_id" data-entity-search-input>
+              <span class="field-error" data-sidebar-sensor-error hidden>Sensor not found.</span>
+            </label>
+            <label>
+              Role
+              <select data-sidebar-field="node_role">
+                <option value="exposure">Exposure</option>
+                <option value="covariate">Covariate</option>
+                <option value="outcome">Outcome</option>
+                <option value="latent">Latent</option>
+              </select>
+            </label>
+            <label>
+              Daily aggregate
+              <select data-sidebar-field="node_aggregation">
+                <option value="last">Last</option>
+                <option value="sum">Sum / count</option>
+                <option value="mean">Mean</option>
+                <option value="min">Min</option>
+                <option value="max">Max</option>
+              </select>
+            </label>
+            <div class="dag-time-grid">
+              <label>
+                From time
+                <input type="time" data-sidebar-field="node_time_start">
+              </label>
+              <label>
+                To time
+                <input type="time" data-sidebar-field="node_time_end">
+              </label>
+            </div>
+            <label>
+              Lag days
+              <input type="number" min="0" max="21" data-sidebar-field="node_day_lag">
+            </label>
+            <button class="button small-button" type="button" data-sidebar-next="preparation">Next: data preparation</button>
+          </div>
+          <div class="sidebar-section sidebar-tab-panel" data-sidebar-panel="preparation" hidden>
+            <h4>Data preparation</h4>
+            <p class="muted">Choose whether this variable stays continuous or becomes a thresholded binary variable.</p>
+            <label>
+              Variable type
+              <select data-sidebar-field="node_value_type">
+                <option value="continuous">Continuous</option>
+                <option value="binary_threshold">Binary from threshold</option>
+              </select>
+            </label>
+            <label data-sidebar-binary-control hidden>
+              Binary rule
+              <select data-sidebar-field="node_threshold_operator">
+                <option value="more_than">More than threshold</option>
+                <option value="less_than">Less than threshold</option>
+              </select>
+            </label>
+            <label data-sidebar-binary-control hidden>
+              Threshold
+              <input type="number" step="any" data-sidebar-field="node_threshold">
+            </label>
+            <button class="button small-button" type="button" data-sidebar-next="advanced">Next: show histogram</button>
+          </div>
+          <div class="sidebar-section sidebar-tab-panel" data-sidebar-panel="advanced" hidden>
+            <h4>Show histogram</h4>
+            <p class="muted">Review the daily distribution for this variable, including coverage, shape, and percentile cut points.</p>
+            <div class="dag-node-histogram sidebar-histogram" data-sidebar-histogram></div>
+          </div>
         </div>
       </aside>
 
-      <section class="dag-stage" aria-label="Simple DAG about sleep and mood">
-        <div class="stage-header">
-          <div>
-            <h2>Three-node DAG</h2>
-            <span>Forward arrows show assumed causal direction.</span>
-          </div>
-          <span class="dag-status-pill">Acyclic</span>
+      <div class="dag-scroll" data-dag-scroll>
+        <div class="dag-canvas" data-dag-canvas data-zoom="1">
+          <svg class="dag-edges" viewBox="0 0 1000 620" preserveAspectRatio="none" aria-hidden="true" data-dag-edges-svg>
+            <defs>
+              <marker id="dag-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z"></path>
+              </marker>
+              <marker id="dag-arrow-selected" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z"></path>
+              </marker>
+            </defs>
+          </svg>
+
+        
+          <article
+            class="dag-node exposure"
+            style="left: 138.0px; top: 140.0px"
+            data-dag-node
+            data-node-id="sensor.nick_r_sleep_minutes_asleep">
+            <input type="hidden" name="node_x" value="138.0" data-node-x>
+            <input type="hidden" name="node_y" value="140.0" data-node-y>
+            <strong class="dag-node-title" data-node-title>Sleep duration</strong>
+            <span class="dag-time-shadow" data-node-time-shadow>
+              t-1
+            </span>
+            <span class="dag-role-shadow" data-node-role-shadow>(exposure)</span>
+            <input type="hidden" name="node_label" value="Sleep duration" data-node-label-input>
+            <input type="hidden" name="node_description" value="" data-node-description>
+            <input type="hidden" name="node_id" value="sensor.nick_r_sleep_minutes_asleep" data-node-id-input>
+            <input type="hidden" name="node_role" value="exposure" data-node-role>
+            <input type="hidden" name="node_missing_strategy" value="drop" data-node-missing-strategy>
+            <input type="hidden" name="node_min_valid" value="" data-node-min-valid>
+            <input type="hidden" name="node_max_valid" value="" data-node-max-valid>
+            <input type="hidden" name="node_time_start" value="" data-node-time-start>
+            <input type="hidden" name="node_time_end" value="" data-node-time-end>
+            <input type="hidden" name="node_rolling_days" value="1" data-node-rolling-days>
+            <input type="hidden" name="node_aggregation" value="last" data-node-aggregation>
+            <input type="hidden" name="node_day_lag" value="1" data-node-day-lag>
+            <input type="hidden" name="node_value_type" value="binary_threshold" data-node-value-type>
+            <input type="hidden" name="node_threshold_operator" value="more_than" data-node-threshold-operator>
+            <input type="hidden" name="node_threshold" value="420.0" data-node-threshold>
+            <div class="dag-node-histogram" data-dag-node-histogram hidden></div>
+            <button class="dag-connect-handle top" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="top"></button>
+            <button class="dag-connect-handle right" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="right"></button>
+            <button class="dag-connect-handle bottom" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="bottom"></button>
+            <button class="dag-connect-handle left" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="left"></button>
+          </article>
+        
+          <article
+            class="dag-node covariate"
+            style="left: 138.0px; top: 300.0px"
+            data-dag-node
+            data-node-id="sensor.nick_r_steps">
+            <input type="hidden" name="node_x" value="138.0" data-node-x>
+            <input type="hidden" name="node_y" value="300.0" data-node-y>
+            <strong class="dag-node-title" data-node-title>Steps</strong>
+            <span class="dag-time-shadow" data-node-time-shadow>
+              t-1
+            </span>
+            <span class="dag-role-shadow" data-node-role-shadow>(covariate)</span>
+            <input type="hidden" name="node_label" value="Steps" data-node-label-input>
+            <input type="hidden" name="node_description" value="" data-node-description>
+            <input type="hidden" name="node_id" value="sensor.nick_r_steps" data-node-id-input>
+            <input type="hidden" name="node_role" value="covariate" data-node-role>
+            <input type="hidden" name="node_missing_strategy" value="drop" data-node-missing-strategy>
+            <input type="hidden" name="node_min_valid" value="" data-node-min-valid>
+            <input type="hidden" name="node_max_valid" value="" data-node-max-valid>
+            <input type="hidden" name="node_time_start" value="" data-node-time-start>
+            <input type="hidden" name="node_time_end" value="" data-node-time-end>
+            <input type="hidden" name="node_rolling_days" value="1" data-node-rolling-days>
+            <input type="hidden" name="node_aggregation" value="max" data-node-aggregation>
+            <input type="hidden" name="node_day_lag" value="1" data-node-day-lag>
+            <input type="hidden" name="node_value_type" value="binary_threshold" data-node-value-type>
+            <input type="hidden" name="node_threshold_operator" value="more_than" data-node-threshold-operator>
+            <input type="hidden" name="node_threshold" value="8000.0" data-node-threshold>
+            <div class="dag-node-histogram" data-dag-node-histogram hidden></div>
+            <button class="dag-connect-handle top" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="top"></button>
+            <button class="dag-connect-handle right" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="right"></button>
+            <button class="dag-connect-handle bottom" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="bottom"></button>
+            <button class="dag-connect-handle left" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="left"></button>
+          </article>
+        
+          <article
+            class="dag-node outcome"
+            style="left: 578.0px; top: 210.0px"
+            data-dag-node
+            data-node-id="sensor.nick_r_mood_score">
+            <input type="hidden" name="node_x" value="578.0" data-node-x>
+            <input type="hidden" name="node_y" value="210.0" data-node-y>
+            <strong class="dag-node-title" data-node-title>Mood score</strong>
+            <span class="dag-time-shadow" data-node-time-shadow>
+              t
+            </span>
+            <span class="dag-role-shadow" data-node-role-shadow>(outcome)</span>
+            <input type="hidden" name="node_label" value="Mood score" data-node-label-input>
+            <input type="hidden" name="node_description" value="" data-node-description>
+            <input type="hidden" name="node_id" value="sensor.nick_r_mood_score" data-node-id-input>
+            <input type="hidden" name="node_role" value="outcome" data-node-role>
+            <input type="hidden" name="node_missing_strategy" value="drop" data-node-missing-strategy>
+            <input type="hidden" name="node_min_valid" value="" data-node-min-valid>
+            <input type="hidden" name="node_max_valid" value="" data-node-max-valid>
+            <input type="hidden" name="node_time_start" value="" data-node-time-start>
+            <input type="hidden" name="node_time_end" value="" data-node-time-end>
+            <input type="hidden" name="node_rolling_days" value="1" data-node-rolling-days>
+            <input type="hidden" name="node_aggregation" value="last" data-node-aggregation>
+            <input type="hidden" name="node_day_lag" value="0" data-node-day-lag>
+            <input type="hidden" name="node_value_type" value="binary_threshold" data-node-value-type>
+            <input type="hidden" name="node_threshold_operator" value="less_than" data-node-threshold-operator>
+            <input type="hidden" name="node_threshold" value="5.7" data-node-threshold>
+            <div class="dag-node-histogram" data-dag-node-histogram hidden></div>
+            <button class="dag-connect-handle top" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="top"></button>
+            <button class="dag-connect-handle right" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="right"></button>
+            <button class="dag-connect-handle bottom" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="bottom"></button>
+            <button class="dag-connect-handle left" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="left"></button>
+          </article>
+        
         </div>
+      </div>
+    </div>
+    <span class="dag-section-resize-handle" aria-hidden="true" data-dag-section-resize-handle></span>
+    </div>
+  </section>
 
-        <svg id="dag-canvas" viewBox="0 0 860 520" role="img" aria-label="Steps affect sleep duration and mood score. Sleep duration affects mood score.">
-          <defs>
-            <marker id="arrowhead" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
-              <path d="M2 2 L12 7 L2 12 Z"></path>
-            </marker>
-          </defs>
+  <datalist id="dag-sensor-options">
+    
+      <option value="sensor.nick_r_mood_score">outcome · Daily mood score on a 0 to 10 scale, where lower values indicate worse mood.</option>
+    
+      <option value="sensor.nick_r_awakenings_count">outcome · Number of recorded awakenings during a sleep session.</option>
+    
+      <option value="sensor.nick_r_sleep_minutes_awake">outcome · Minutes recorded awake during the sleep window.</option>
+    
+      <option value="sensor.nick_r_sleep_time_in_bed">outcome · Total minutes recorded in bed.</option>
+    
+      <option value="sensor.nick_r_sleep_minutes_asleep">covariate · Total minutes asleep during the prior sleep period.</option>
+    
+      <option value="sensor.nick_r_sleep_minutes_to_fall_asleep">outcome · Minutes recorded before falling asleep.</option>
+    
+      <option value="sensor.nick_r_sleep_efficiency">outcome · Sleep efficiency percentage from the sleep tracker.</option>
+    
+      <option value="sensor.nick_r_sleep_start_time">outcome · Reported sleep start time.</option>
+    
+      <option value="binary_sensor.pantry_door_window">covariate · This is my pantry door that I get food out of. On means I opened it, Off means I closed it</option>
+    
+      <option value="sensor.nick_r_steps">covariate · The number of steps I take a day. It is cumulative for each day.</option>
+    
+      <option value="sensor.nutribullet_plug_current">covariate · the number of amps going through my nutribullet. A value over 1 means I made a smoothie at that time</option>
+    
+      <option value="binary_sensor.bthome_sensor_ee5c_window">covariate · This is my refrigerator door that I get food out of in my room. On means I opened it, Off means I closed it</option>
+    
+  </datalist>
 
-          <path class="dag-edge static-dag-edge delay-0" d="M240 166 C310 150 372 150 442 166"></path>
-          <path class="dag-edge static-dag-edge delay-1" d="M240 216 C362 300 484 316 606 256"></path>
-          <path class="dag-edge static-dag-edge delay-2" d="M560 190 C598 194 622 206 646 226"></path>
+  <div class="dag-edge-store" data-dag-edge-list hidden>
+    
+      <div class="dag-edge-row" data-dag-edge-row>
+        <input name="edge_source" value="sensor.nick_r_sleep_minutes_asleep" data-edge-source>
+        <input name="edge_target" value="sensor.nick_r_mood_score" data-edge-target>
+        <input name="edge_label" value="effect" data-edge-label>
+      </div>
+    
+      <div class="dag-edge-row" data-dag-edge-row>
+        <input name="edge_source" value="sensor.nick_r_steps" data-edge-source>
+        <input name="edge_target" value="sensor.nick_r_sleep_minutes_asleep" data-edge-target>
+        <input name="edge_label" value="activity-sleep" data-edge-label>
+      </div>
+    
+      <div class="dag-edge-row" data-dag-edge-row>
+        <input name="edge_source" value="sensor.nick_r_steps" data-edge-source>
+        <input name="edge_target" value="sensor.nick_r_mood_score" data-edge-target>
+        <input name="edge_label" value="adjust" data-edge-label>
+      </div>
+    
+  </div>
 
-          <g class="dag-node static-dag-node" transform="translate(100 128)">
-            <rect width="140" height="96" rx="18"></rect>
-            <text x="70" y="42">Steps</text>
-            <text class="node-role" x="70" y="68">Confounder</text>
-          </g>
+</form>
 
-          <g class="dag-node static-dag-node" transform="translate(442 128)">
-            <rect width="150" height="96" rx="18"></rect>
-            <text x="75" y="39">Sleep</text>
-            <text x="75" y="60">duration</text>
-            <text class="node-role" x="75" y="80">Exposure</text>
-          </g>
+<section class="workflow-section workflow-analysis-section is-analysis-collapsed" data-analysis-section>
+  <div class="workflow-heading analysis-workflow-heading">
+    <div>
+      <p class="workflow-step-label">Step 2</p>
+      <h2>
+        <button class="section-toggle" type="button" aria-expanded="false" aria-label="Expand causal analysis" title="Expand causal analysis" data-analysis-tools-toggle></button>
+        Causal Analysis
+      </h2>
+      <p class="muted">Choose the causal method, run the model, and review the effect estimates and plots.</p>
+    </div>
+  </div>
 
-          <g class="dag-node static-dag-node" transform="translate(646 218)">
-            <rect width="150" height="96" rx="18"></rect>
-            <text x="75" y="39">Mood</text>
-            <text x="75" y="60">score</text>
-            <text class="node-role" x="75" y="80">Outcome</text>
-          </g>
-        </svg>
+  <div id="analysis-tools-body" class="analysis-tools-shell" data-analysis-tools-body>
+  <div class="workbench" data-analysis-workbench>
+    <aside class="panel workbench-controls">
+      <div class="panel-heading compact-heading">
+      <div>
+        <h2>Analysis setup</h2>
+        <p class="muted">Define the outcome, exposure, relevant history, and covariates.</p>
+      </div>
+      </div>
+      <form
+        method="post"
+        action="/run"
+        class="settings-form"
+        data-analysis-form
+        data-autosave-url="/settings/autosave">
+        <input name="analysis_window_days" type="hidden" value="90" data-analysis-days-secondary>
+
+      <label>
+        Causal inference method
+        <select name="analysis_method" data-analysis-method>
+          
+            <option value="dag_auto" >Choose from DAG</option>
+          
+            <option value="g_formula" selected>G-formula / outcome model</option>
+          
+            <option value="ipw" >Inverse probability weighting (IPW)</option>
+          
+            <option value="doubly_robust" >Doubly robust / AIPW</option>
+          
+        </select>
+        <span class="shadow-text">Methods available from the DAG: IPW, G-formula, and doubly robust estimation.</span>
+      </label>
+      <div class="method-equation" data-method-equation aria-live="polite"></div>
+
+      <input type="hidden" name="sleep_sensor" value="sensor.nick_r_mood_score" data-outcome-sensor>
+      <input type="hidden" name="outcome_operator" value="less_than" data-outcome-operator>
+      <input type="hidden" name="outcome_threshold" value="5.7" data-threshold-input>
+      <input type="hidden" name="exposure_sensor" value="sensor.nick_r_sleep_minutes_asleep">
+      <input type="hidden" name="exposure_aggregation" value="last">
+      <input type="hidden" name="exposure_operator" value="more_than">
+      <input type="hidden" name="exposure_threshold" value="420.0">
+      <input type="hidden" name="state_forgetting" value="0.985">
+      <input type="hidden" name="max_lag_days" value="7">
+      <input type="hidden" name="sleep_start_sensor" value="">
+      <input type="hidden" name="exclude_before_sleep_start_minutes" value="0">
+
+      <datalist id="covariate-sensor-options">
+        
+          <option value="sensor.nick_r_sleep_minutes_asleep">Covariate · Total minutes asleep during the prior sleep period.</option>
+        
+          <option value="binary_sensor.pantry_door_window">Covariate · This is my pantry door that I get food out of. On means I opened it, Off means I closed it</option>
+        
+          <option value="sensor.nick_r_steps">Covariate · The number of steps I take a day. It is cumulative for each day.</option>
+        
+          <option value="sensor.nutribullet_plug_current">Covariate · the number of amps going through my nutribullet. A value over 1 means I made a smoothie at that time</option>
+        
+          <option value="binary_sensor.bthome_sensor_ee5c_window">Covariate · This is my refrigerator door that I get food out of in my room. On means I opened it, Off means I closed it</option>
+        
+        
+          <option value="sensor.nick_r_mood_score">Sleep sensor · previous-night predictor · Daily mood score on a 0 to 10 scale, where lower values indicate worse mood.</option>
+        
+          <option value="sensor.nick_r_awakenings_count">Sleep sensor · previous-night predictor · Number of recorded awakenings during a sleep session.</option>
+        
+          <option value="sensor.nick_r_sleep_minutes_awake">Sleep sensor · previous-night predictor · Minutes recorded awake during the sleep window.</option>
+        
+          <option value="sensor.nick_r_sleep_time_in_bed">Sleep sensor · previous-night predictor · Total minutes recorded in bed.</option>
+        
+          <option value="sensor.nick_r_sleep_minutes_to_fall_asleep">Sleep sensor · previous-night predictor · Minutes recorded before falling asleep.</option>
+        
+          <option value="sensor.nick_r_sleep_efficiency">Sleep sensor · previous-night predictor · Sleep efficiency percentage from the sleep tracker.</option>
+        
+          <option value="sensor.nick_r_sleep_start_time">Sleep sensor · previous-night predictor · Reported sleep start time.</option>
+        
+      </datalist>
+      <datalist id="all-sensor-options">
+        
+          <option value="sensor.nick_r_mood_score">outcome · Daily mood score on a 0 to 10 scale, where lower values indicate worse mood.</option>
+        
+          <option value="sensor.nick_r_awakenings_count">outcome · Number of recorded awakenings during a sleep session.</option>
+        
+          <option value="sensor.nick_r_sleep_minutes_awake">outcome · Minutes recorded awake during the sleep window.</option>
+        
+          <option value="sensor.nick_r_sleep_time_in_bed">outcome · Total minutes recorded in bed.</option>
+        
+          <option value="sensor.nick_r_sleep_minutes_asleep">covariate · Total minutes asleep during the prior sleep period.</option>
+        
+          <option value="sensor.nick_r_sleep_minutes_to_fall_asleep">outcome · Minutes recorded before falling asleep.</option>
+        
+          <option value="sensor.nick_r_sleep_efficiency">outcome · Sleep efficiency percentage from the sleep tracker.</option>
+        
+          <option value="sensor.nick_r_sleep_start_time">outcome · Reported sleep start time.</option>
+        
+          <option value="binary_sensor.pantry_door_window">covariate · This is my pantry door that I get food out of. On means I opened it, Off means I closed it</option>
+        
+          <option value="sensor.nick_r_steps">covariate · The number of steps I take a day. It is cumulative for each day.</option>
+        
+          <option value="sensor.nutribullet_plug_current">covariate · the number of amps going through my nutribullet. A value over 1 means I made a smoothie at that time</option>
+        
+          <option value="binary_sensor.bthome_sensor_ee5c_window">covariate · This is my refrigerator door that I get food out of in my room. On means I opened it, Off means I closed it</option>
+        
+      </datalist>
+      
+        <input type="hidden" name="predictor_entities" value="sensor.nick_r_steps">
+        <input type="hidden" name="predictor_aggregations" value="max">
+        <input type="hidden" name="predictor_day_offsets" value="1">
+      
+
+        <button class="primary" type="submit" data-run-analysis-button >Run analysis</button>
+      </form>
+    </aside>
+
+    <button
+      class="workbench-resizer"
+      type="button"
+      aria-label="Resize analysis setup panel"
+      title="Drag to resize setup panel"
+      data-workbench-resizer>
+      <span></span>
+    </button>
+
+    <main id="analysis-results" class="workbench-output analysis-results" data-analysis-results>
+    <div class="panel workbench-running" data-workbench-loading aria-live="polite">
+      <div class="analysis-progress" data-analysis-progress>
+        <div class="analysis-progress-heading">
+          <span class="spinner" aria-hidden="true"></span>
+          <div>
+            <h2>Running analysis</h2>
+            <p class="muted" data-analysis-progress-message>Starting the analysis workflow.</p>
+          </div>
+        </div>
+        <div class="analysis-step-tabs" role="tablist" aria-label="Analysis run steps">
+          <span class="analysis-step-tab active" data-progress-step="0">Fetch history</span>
+          <span class="analysis-step-tab" data-progress-step="1">Build variables</span>
+          <span class="analysis-step-tab" data-progress-step="2">Estimate effects</span>
+          <span class="analysis-step-tab" data-progress-step="3">Check positivity</span>
+          <span class="analysis-step-tab" data-progress-step="4">Build plots</span>
+          <span class="analysis-step-tab" data-progress-step="5">Build diagnostics</span>
+          <span class="analysis-step-tab" data-progress-step="6">Validate outputs</span>
+          <span class="analysis-step-tab" data-progress-step="7">Format report</span>
+          <span class="analysis-step-tab" data-progress-step="8">Render results</span>
+        </div>
+      </div>
+    </div>
+
+    
+      <section class="panel workbench-empty">
+        <h2>Analysis output</h2>
+        <p class="muted">Run the model from the setup panel to load the setup summary and prediction-over-time chart here.</p>
       </section>
-    </section>
-  </main>
+    
+    </main>
+  </div>
+  </div>
+</section>
 
-  <script src="script.js"></script>
-</body>
+
+    </main>
+    <div class="onboarding-overlay" data-onboarding-overlay hidden>
+      <div class="onboarding-scrim" aria-hidden="true"></div>
+      <div class="onboarding-spotlight" data-onboarding-spotlight></div>
+      <section class="onboarding-card" role="dialog" aria-live="polite" aria-label="Application guide" data-onboarding-card>
+        <p class="eyebrow" data-onboarding-count>Guide</p>
+        <h2 data-onboarding-title></h2>
+        <p data-onboarding-copy></p>
+        <div class="onboarding-actions">
+          <button class="button small-button" type="button" data-onboarding-skip>Skip</button>
+          <button class="button small-button primary" type="button" data-onboarding-next>Next</button>
+        </div>
+      </section>
+    </div>
+  </body>
 </html>
