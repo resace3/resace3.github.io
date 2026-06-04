@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>N of 1 Causal Analysis Engine</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v=static_version('styles.css')) }}">
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [["\\(", "\\)"]],
+          displayMath: [["\\[", "\\]"]]
+        },
+        startup: {
+          typeset: false
+        }
+      };
+    </script>
+    <script>
+      window.entitySearchUrl = "{{ url_for('search_entities') }}";
+    </script>
+    <script defer src="{{ url_for('static', filename='app.js', v=static_version('app.js')) }}"></script>
+  </head>
+  <body>
+    <header class="personal-site-header">
+      <nav class="personal-site-nav" aria-label="Personal website navigation">
+        <div class="personal-brand-group">
+          <a class="personal-brand" href="/index.html" aria-label="Nick Rezaee home">Nick Rezaee</a>
+          <a class="personal-project-pill" href="/new-projects.html">New Projects</a>
+        </div>
+        <div class="personal-nav-links">
+          <a href="/index.html#experience">Experience</a>
+          <a href="/index.html#skills">Skills</a>
+          <a href="/index.html#contact">Contact</a>
+        </div>
+      </nav>
+    </header>
+    <header class="app-topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <span class="brand-mark">CAE</span>
+          <div>
+            <strong>N of 1 Causal Analysis Engine</strong>
+            <span>N-of-1 causal model</span>
+          </div>
+        </div>
+        <nav class="tabs" aria-label="Primary">
+          <a
+            class="tab{% if active_tab == 'analysis' %} active{% endif %}"
+            href="/causal-dag.html"
+            {% if active_tab == 'analysis' %}aria-current="page"{% endif %}>
+            Analysis
+          </a>
+          <button class="tab guide-tab" type="button" data-onboarding-start>Guide me</button>
+        </nav>
+      </div>
+    </header>
+    <main class="shell">
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="notice">{{ messages[0] }}</div>
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+    <div class="onboarding-overlay" data-onboarding-overlay hidden>
+      <div class="onboarding-scrim" aria-hidden="true"></div>
+      <div class="onboarding-spotlight" data-onboarding-spotlight></div>
+      <section class="onboarding-card" role="dialog" aria-live="polite" aria-label="Application guide" data-onboarding-card>
+        <p class="eyebrow" data-onboarding-count>Guide</p>
+        <h2 data-onboarding-title></h2>
+        <p data-onboarding-copy></p>
+        <div class="onboarding-actions">
+          <button class="button small-button" type="button" data-onboarding-skip>Skip</button>
+          <button class="button small-button primary" type="button" data-onboarding-next>Next</button>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

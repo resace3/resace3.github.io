@@ -1,48 +1,451 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nick Rezaee</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Nick Rezaee, Programmer II and software engineer building scalable Python, SQL, Spark, and AWS data systems for public health, genomics, and quantitative analytics.">
+  <title>Nick Rezaee | Software Engineer & Data Systems Programmer</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary navigation">
+      <div class="brand-group">
+        <a class="brand" href="#top" aria-label="Nick Rezaee home">Nick Rezaee</a>
+        <a class="new-projects-badge" href="new-projects.html">New Projects</a>
+      </div>
+      <div class="nav-links">
+        <a href="#experience">Experience</a>
+        <a href="#skills">Skills</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
 
-<nav>
-  <div class="logo">Nick Rezaee</div>
-  <ul>
-    <li><a href="#projects">Projects</a></li>
-    <li><a href="#research">Research</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-</nav>
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <h1 class="reveal"><span class="title-line">Biomedical Data</span><br><span class="title-line">Systems Engineer</span></h1>
+        <p class="lede">
+          Architecting scalable data platforms, analytics pipelines, and research infrastructure.
+        </p>
+      </div>
 
-<header class="hero">
-  <h1>Computational Biologist & Research Software Engineer</h1>
-  <p>Building tools for digital phenotyping, causal inference, and digital health research.</p>
-</header>
+      <div class="hero-architecture reveal">
+        <div class="systems-panel architecture-panel" aria-label="Systems architecture animation">
+          <div class="architecture-visual" aria-hidden="true">
+            <svg class="arch-svg layered-pipeline-svg" viewBox="0 0 1000 680" role="img" aria-label="Animated four stage biomedical data engineering architecture">
+              <defs>
+                <linearGradient id="arch-line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#2563eb" stop-opacity="0.18" />
+                  <stop offset="50%" stop-color="#0f9f8a" stop-opacity="0.95" />
+                  <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.18" />
+                </linearGradient>
+                <filter id="arch-glow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
 
-<section id="projects">
-  <h2>Featured Projects</h2>
-  <div class="card">
-    <h3>Home Assistant Digital Health Platform</h3>
-    <p>Open-source infrastructure for integrating wearables, sensors, and health analytics.</p>
-  </div>
-</section>
+              <g class="arch-connections">
+                <path class="arch-path delay-0" d="M151 102 C205 102 226 116 280 116" />
+                <path class="arch-path delay-1" d="M151 198 C205 198 226 188 280 188" />
+                <path class="arch-path delay-2" d="M151 294 C205 294 226 260 280 260" />
+                <path class="arch-path delay-3" d="M151 390 C205 390 226 404 280 404" />
+                <path class="arch-path delay-4" d="M151 486 C205 486 226 476 280 476" />
 
-<section id="research">
-  <h2>Research Interests</h2>
-  <ul>
-    <li>Digital Phenotyping</li>
-    <li>Causal Inference</li>
-    <li>Clinical NLP</li>
-  </ul>
-</section>
+                <path class="arch-path delay-0" d="M434 116 C472 116 472 188 434 188" />
+                <path class="arch-path delay-1" d="M434 188 C472 188 472 260 434 260" />
+                <path class="arch-path delay-2" d="M434 260 C472 260 472 332 434 332" />
+                <path class="arch-path delay-3" d="M434 332 C472 332 472 404 434 404" />
+                <path class="arch-path delay-4" d="M434 404 C472 404 472 476 434 476" />
+                <path class="arch-path delay-1" d="M434 188 C496 188 496 404 434 404" />
+                <path class="arch-path delay-2" d="M434 260 C500 260 500 476 434 476" />
+                <path class="arch-path delay-3" d="M434 116 C510 116 510 476 434 476" />
 
-<section id="contact">
-  <h2>Contact</h2>
-  <p>your-email@example.com</p>
-</section>
+                <path class="arch-path delay-0" d="M434 116 C520 116 546 146 632 146" />
+                <path class="arch-path delay-1" d="M434 188 C520 188 546 250 632 250" />
+                <path class="arch-path delay-2" d="M434 332 C520 332 546 354 632 354" />
+                <path class="arch-path delay-3" d="M434 476 C520 476 546 458 632 458" />
+                <path class="arch-path delay-4" d="M434 260 C520 260 546 354 632 354" />
+                <path class="arch-path delay-1" d="M434 404 C520 404 546 250 632 250" />
 
+                <path class="arch-path delay-0" d="M766 146 C820 146 841 146 895 146" />
+                <path class="arch-path delay-1" d="M766 250 C820 250 841 250 895 250" />
+                <path class="arch-path delay-2" d="M766 354 C820 354 841 354 895 354" />
+                <path class="arch-path delay-3" d="M766 458 C820 458 841 458 895 458" />
+                <path class="arch-path delay-4" d="M766 146 C834 146 827 354 895 354" />
+                <path class="arch-path delay-1" d="M766 458 C834 458 827 250 895 250" />
+
+                <path class="arch-path delay-0" d="M956 146 C974 146 974 250 956 250" />
+                <path class="arch-path delay-1" d="M956 250 C974 250 974 354 956 354" />
+                <path class="arch-path delay-2" d="M956 354 C974 354 974 458 956 458" />
+              </g>
+
+              <g class="moving-packets" filter="url(#arch-glow)">
+                <circle class="packet packet-a" r="5" />
+                <circle class="packet packet-b" r="5" />
+                <circle class="packet packet-c" r="5" />
+                <circle class="packet packet-d" r="5" />
+              <circle class="packet packet-e" r="5" />
+              <circle class="packet packet-f" r="5" />
+              <circle class="packet packet-g" r="5" />
+                <circle class="packet packet-h" r="5" />
+                <circle class="packet packet-i" r="5" />
+              </g>
+
+            <g class="arch-boxes">
+                <g class="layer-labels">
+                  <text x="88" y="28">EHR Sources</text>
+                  <text x="357" y="28">Record Processing</text>
+                  <text x="699" y="28">Analysis Checks</text>
+                  <text x="954" y="28">Research Outputs</text>
+                </g>
+
+                <g class="svg-box source-box messy-box" transform="translate(32 66)">
+                  <rect width="112" height="72" rx="16" />
+                  <text x="56" y="33">Patient</text>
+                  <text class="box-subtitle" x="56" y="54">records</text>
+                </g>
+                <g class="svg-box source-box messy-box" transform="translate(37 164)">
+                  <rect width="102" height="68" rx="16" />
+                  <text x="51" y="31">meds</text>
+                  <text class="box-subtitle" x="51" y="51">records</text>
+                </g>
+                <g class="svg-box source-box messy-box" transform="translate(32 260)">
+                  <rect width="112" height="68" rx="16" />
+                  <text x="56" y="31">Claims</text>
+                  <text class="box-subtitle" x="56" y="51">records</text>
+                </g>
+                <g class="svg-box source-box messy-box" transform="translate(39 356)">
+                  <rect width="98" height="68" rx="16" />
+                  <text x="49" y="31">Notes</text>
+                  <text class="box-subtitle" x="49" y="51">clinical</text>
+                </g>
+                <g class="svg-box source-box messy-box" transform="translate(32 450)">
+                  <rect width="112" height="72" rx="16" />
+                  <text x="56" y="33">Labs</text>
+                  <text class="box-subtitle" x="56" y="54">results</text>
+                </g>
+
+                <g class="svg-box worker-box transform-box" transform="translate(280 87)">
+                  <rect width="140" height="58" rx="15" />
+                  <text x="70" y="27">Ingest</text>
+                  <text class="box-subtitle" x="70" y="45">EHR rows</text>
+                </g>
+                <g class="svg-box worker-box transform-box" transform="translate(280 159)">
+                  <rect width="140" height="58" rx="15" />
+                  <text x="70" y="27">Normalize</text>
+                  <text class="box-subtitle" x="70" y="45">codes</text>
+                </g>
+                <g class="svg-box worker-box transform-box" transform="translate(280 231)">
+                  <rect width="140" height="58" rx="15" />
+                  <text x="70" y="27">Map</text>
+                  <text class="box-subtitle" x="70" y="45">concepts</text>
+                </g>
+                <g class="svg-box worker-box transform-box" transform="translate(280 303)">
+                  <rect width="140" height="58" rx="15" />
+                  <text x="70" y="27">Partition</text>
+                  <text class="box-subtitle" x="70" y="45">patients</text>
+                </g>
+                <g class="svg-box worker-box transform-box" transform="translate(280 375)">
+                  <rect width="140" height="58" rx="15" />
+                  <text x="70" y="27">Aggregate</text>
+                  <text class="box-subtitle" x="70" y="45">encounters</text>
+                </g>
+                <g class="svg-box worker-box transform-box dense-worker" transform="translate(280 447)">
+                  <rect width="140" height="58" rx="15" />
+                  <text x="70" y="27">Feature Build</text>
+                  <text class="box-subtitle" x="70" y="45">cohorts</text>
+                </g>
+                <g class="svg-box aggregate-box validation-box" transform="translate(632 108)">
+                  <rect width="134" height="76" rx="16" />
+                  <text x="67" y="35">Missingness</text>
+                  <text class="box-subtitle" x="67" y="56">checks</text>
+                </g>
+                <g class="svg-box aggregate-box validation-box" transform="translate(632 212)">
+                  <rect width="134" height="76" rx="16" />
+                  <text x="67" y="35">Cohort</text>
+                  <text class="box-subtitle" x="67" y="56">tests</text>
+                </g>
+                <g class="svg-box aggregate-box validation-box" transform="translate(632 316)">
+                  <rect width="134" height="76" rx="16" />
+                  <text x="67" y="35">Model</text>
+                  <text class="box-subtitle" x="67" y="56">checks</text>
+                </g>
+                <g class="svg-box aggregate-box validation-box" transform="translate(632 420)">
+                  <rect width="134" height="76" rx="16" />
+                  <text x="67" y="35">Lineage</text>
+                  <text class="box-subtitle" x="67" y="56">audit</text>
+                </g>
+
+                <g class="svg-box output-box clean-box" transform="translate(895 110)">
+                  <rect width="118" height="72" rx="16" />
+                  <text x="59" y="33">Cohorts</text>
+                  <text class="box-subtitle" x="59" y="54">analysis</text>
+                </g>
+                <g class="svg-box output-box clean-box" transform="translate(895 214)">
+                  <rect width="118" height="72" rx="16" />
+                  <text x="59" y="33">Models</text>
+                  <text class="box-subtitle" x="59" y="54">outcomes</text>
+                </g>
+                <g class="svg-box output-box clean-box" transform="translate(895 318)">
+                  <rect width="118" height="72" rx="16" />
+                  <text x="59" y="33">Tables</text>
+                  <text class="box-subtitle" x="59" y="54">analysis</text>
+                </g>
+                <g class="svg-box output-box clean-box" transform="translate(895 422)">
+                  <rect width="118" height="72" rx="16" />
+                  <text x="59" y="33">Reports</text>
+                  <text class="box-subtitle" x="59" y="54">clinical</text>
+                </g>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-project-tease" aria-label="Project highlights">
+        <div class="project-scroll-cue">
+          <a href="#projects">Explore selected engineering work</a>
+          <a class="scroll-arrow" href="#projects" aria-label="Scroll to projects"></a>
+        </div>
+        <a class="tease-card" href="#projects">
+          <span>EHR Infrastructure</span>
+          <strong>Billions of clinical records</strong>
+          <p>Large-scale pipelines for cleaning, standardizing, and preparing health data for research analysis.</p>
+        </a>
+        <a class="tease-card" href="#projects">
+          <span>Spatial Transcriptomics</span>
+          <strong>Petabyte-scale research data</strong>
+          <p>Distributed processing patterns for high-volume biological datasets and computational workflows.</p>
+        </a>
+        <a class="tease-card" href="#projects">
+          <span>Quant Engineering</span>
+          <strong>Financial data systems at Citibank</strong>
+          <p>Metadata ingestion, SQL workflows, and machine learning for structured financial data operations.</p>
+        </a>
+      </div>
+
+    </section>
+
+    <section class="section projects-section" id="projects">
+      <div class="section-heading reveal">
+        <p class="section-kicker">Projects</p>
+        <h2>Systems built around messy, high-volume scientific data.</h2>
+      </div>
+
+      <div class="project-stack">
+        <article class="project-card project-clinical reveal">
+          <div class="project-copy">
+            <p class="project-label">Harvard T.H. Chan School of Public Health</p>
+            <h3>Clinical Outcomes Data Pipeline</h3>
+            <p>
+              Python and SQL pipelines that clean 500K+ daily patient records, standardize VA and EHR datasets, and prepare data for regression analysis and clinical outcome modeling.
+            </p>
+            <div class="project-tags">
+              <span>Python</span>
+              <span>SQL</span>
+              <span>EHR</span>
+              <span>Clinical Modeling</span>
+            </div>
+          </div>
+          <div class="project-visual clinical-flow" aria-hidden="true">
+            <div class="record-stream">
+              <span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="flow-node raw">Raw</div>
+            <div class="flow-line"></div>
+            <div class="flow-node clean">Clean</div>
+            <div class="flow-line"></div>
+            <div class="flow-node model">Model</div>
+          </div>
+        </article>
+
+        <article class="project-card project-genomics reveal">
+          <div class="project-copy">
+            <p class="project-label">Caltech</p>
+            <h3>Distributed Spatial Transcriptomics Processing</h3>
+            <p>
+              Apache Spark and AWS workflows for efficient analysis of petabyte-scale spatial transcriptomics data, paired with Python ingestion services and retry-aware batch orchestration.
+            </p>
+            <div class="project-tags">
+              <span>Apache Spark</span>
+              <span>AWS Batch</span>
+              <span>Petabyte-scale</span>
+              <span>Genomics</span>
+            </div>
+          </div>
+          <div class="project-visual genomics-grid" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </article>
+
+        <article class="project-card project-metadata reveal">
+          <div class="project-copy">
+            <p class="project-label">Citibank</p>
+            <h3>Metadata Ingestion and Column Inference</h3>
+            <p>
+              Automated metadata ingestion, SQL integration workflows, and Python machine learning to infer column names and reduce manual data lineage documentation effort.
+            </p>
+            <div class="project-tags">
+              <span>Python ML</span>
+              <span>SQL Procedures</span>
+              <span>Metadata</span>
+              <span>Lineage</span>
+            </div>
+          </div>
+          <div class="project-visual metadata-match" aria-hidden="true">
+            <div class="schema-list source">
+              <span>col_001</span>
+              <span>evt_ts</span>
+              <span>acct_id</span>
+            </div>
+            <div class="match-lines">
+              <i></i><i></i><i></i>
+            </div>
+            <div class="schema-list target">
+              <span>account_id</span>
+              <span>event_time</span>
+              <span>risk_score</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="project-card project-signals reveal">
+          <div class="project-copy">
+            <p class="project-label">UC Santa Cruz Genomics Institute</p>
+            <h3>Electrophysiology Batch Processing</h3>
+            <p>
+              Parallel Python pipelines for large electrophysiology datasets and clinical records, reducing runtimes from roughly 6 hours to under 2 hours while supporting 3TB+ workloads.
+            </p>
+            <div class="project-tags">
+              <span>Parallel Python</span>
+              <span>Statsmodels</span>
+              <span>SciPy</span>
+              <span>3TB+</span>
+            </div>
+          </div>
+          <div class="project-visual signal-scope" aria-hidden="true">
+            <div class="scope-grid"></div>
+            <div class="wave wave-a"></div>
+            <div class="wave wave-b"></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="experience">
+      <div class="section-heading reveal">
+        <p class="section-kicker">Experience</p>
+        <h2>Selected Work</h2>
+      </div>
+
+      <div class="timeline">
+        <article class="role reveal">
+          <div class="role-meta">
+            <span class="company">Harvard T.H. Chan School of Public Health</span>
+            <span>Aug 2021 - Present</span>
+            <span>Boston</span>
+          </div>
+          <div class="role-body">
+            <h3>Programmer II</h3>
+            <ul>
+              <li>Built Python and SQL pipelines to clean 500K+ daily patient records for regression analysis and clinical outcome modeling.</li>
+              <li>Developed parallel batch-processing workflows for 1,000+ automated batches in hours.</li>
+              <li>Processed and standardized VA and EHR datasets to support reliable downstream analysis.</li>
+              <li>Refactored 20+ data processing scripts to improve reliability and support robust statistical inference.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="role reveal">
+          <div class="role-meta">
+            <span class="company">Caltech</span>
+            <span>Aug 2020 - Aug 2021</span>
+            <span>Pasadena, CA</span>
+          </div>
+          <div class="role-body">
+            <h3>Senior Software Engineer</h3>
+            <ul>
+              <li>Built and maintained a scalable Python data analysis pipeline, reducing processing time by 30-50 percent.</li>
+              <li>Developed Apache Spark pipelines for petabyte-scale spatial transcriptomics analysis on AWS.</li>
+              <li>Built Python and AWS Batch ingestion services with retry logic and parallel orchestration, processing 10,000+ files per week with under 1 percent failure.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="role reveal">
+          <div class="role-meta">
+            <span class="company">Citibank</span>
+            <span>Mar 2020 - Aug 2020</span>
+            <span>New York City Metro</span>
+          </div>
+          <div class="role-body">
+            <h3>Quantitative Software Engineer</h3>
+            <ul>
+              <li>Automated metadata ingestion and transformation in Python, reducing manual handling time by roughly 40 percent.</li>
+              <li>Streamlined integration workflows with structured SQL procedures, reducing manual intervention by roughly 30 percent.</li>
+              <li>Applied machine learning in Python to infer and assign column names, cutting data lineage documentation effort by roughly 25 percent.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="role reveal">
+          <div class="role-meta">
+            <span class="company">UC Santa Cruz Genomics Institute</span>
+            <span>Nov 2018 - Mar 2020</span>
+          </div>
+          <div class="role-body">
+            <h3>Data Engineer</h3>
+            <ul>
+              <li>Built parallel Python pipelines for large electrophysiology datasets, reducing processing time by roughly 40 percent and supporting 3TB+ workloads.</li>
+              <li>Implemented parallelized batch-processing that cut runtime from about 6 hours to under 2 hours for 50,000+ clinical records per run.</li>
+              <li>Performed dataset validation with Statsmodels and SciPy before downstream analytics.</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section skills-section" id="skills">
+      <div class="section-heading reveal">
+        <p class="section-kicker">Skills</p>
+        <h2>Tools I use to move data from raw to reliable.</h2>
+      </div>
+      <div class="skill-grid">
+        <div class="reveal">
+          <h3>Languages</h3>
+          <p>Python, SQL</p>
+        </div>
+        <div class="reveal">
+          <h3>Data Systems</h3>
+          <p>Apache Spark, AWS Batch, parallel processing, ingestion pipelines</p>
+        </div>
+        <div class="reveal">
+          <h3>Research Data</h3>
+          <p>EHR, VA datasets, spatial transcriptomics, electrophysiology, clinical records</p>
+        </div>
+        <div class="reveal">
+          <h3>Analysis</h3>
+          <p>Regression workflows, clinical outcome modeling, Statsmodels, SciPy, machine learning</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact reveal" id="contact">
+      <div>
+        <p class="section-kicker">Contact</p>
+        <h2>Open to research software, data engineering, and computational health collaborations.</h2>
+      </div>
+      <a class="button primary" href="https://www.linkedin.com/in/nick-rezaee-001928231/">Connect on LinkedIn</a>
+    </section>
+  </main>
+  <script src="script.js"></script>
 </body>
 </html>

@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% from "_result_output.html" import render_result_output %}
+{% block content %}
+<section class="header report-header">
+  <div>
+    <p class="eyebrow">Saved report</p>
+    <h1>{{ report.name }}</h1>
+    <p class="muted">Immutable snapshot created {{ report.created_at }}.</p>
+  </div>
+  <div class="saved-analysis-actions">
+    <a class="button small-button" href="{{ url_for('download_saved_analysis_pdf', analysis_id=analysis.id) }}">Download PDF</a>
+    <form method="post" action="{{ url_for('delete_saved_analysis', analysis_id=analysis.id) }}">
+      <button class="button small-button danger-button" type="submit">Delete analysis</button>
+    </form>
+  </div>
+</section>
+
+<section class="panel report-card">
+  <div class="model-summary">
+    <dl>
+      <div>
+        <dt>Method</dt>
+        <dd>{{ report.metadata.analysis_method_label }}</dd>
+      </div>
+      <div>
+        <dt>Number of days</dt>
+        <dd>{{ report.metadata.analysis_window_days }}</dd>
+      </div>
+      <div>
+        <dt>Outcome</dt>
+        <dd>{{ report.metadata.outcome_label }}</dd>
+      </div>
+      <div>
+        <dt>Exposure</dt>
+        <dd>{{ report.metadata.exposure_label }}</dd>
+      </div>
+      <div>
+        <dt>Rows</dt>
+        <dd>{{ report.metadata.rows }} rows · {{ report.metadata.date_start }} to {{ report.metadata.date_end }}</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<section class="panel report-card">
+  <div class="result-section-heading">
+    <div>
+      <p class="eyebrow">Causal DAG</p>
+      <h2>Graph snapshot</h2>
+    </div>
+  </div>
+  <div class="report-dag-image">
+    {{ report.dag_svg | safe }}
+  </div>
+</section>
+
+<section class="panel report-card effect-estimate-card method-primary-result">
+  <div class="result-section-heading">
+    <div>
+      <p class="eyebrow">Main result</p>
+      <h2>Treatment effect estimate</h2>
+      <p class="muted">{{ report.metadata.exposure_label }} on {{ report.metadata.outcome_label }}</p>
+    </div>
+  </div>
+  <div class="effect-estimate">
+    <strong>{{ report.effect_estimates.contemporaneous }}</strong>
+    <span>95% CI {{ report.effect_estimates.lower }} to {{ report.effect_estimates.upper }}</span>
+    <small>Latest estimate through {{ report.effect_estimates.date }}</small>
+  </div>
+</section>
+
+<section class="panel report-card">
+  <p class="eyebrow">Variable settings</p>
+  <h2>Saved variable configuration</h2>
+  <div class="report-variable-grid">
+    {% for node in report.variable_settings %}
+      <article>
+        <strong>{{ node.label }}</strong>
+        <span>{{ node.role }} · {{ node.id }}</span>
+        <small>Aggregate {{ node.aggregation }} · lag {{ node.day_lag or 0 }} day(s) · {{ node.value_type }}</small>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel report-card">
+  <p class="eyebrow">Model settings</p>
+  <h2>Estimator configuration</h2>
+  <div class="model-summary">
+    <dl>
+      <div>
+        <dt>Selected method</dt>
+        <dd>{{ report.model_settings.analysis_method_label }}</dd>
+      </div>
+      <div>
+        <dt>State forgetting factor</dt>
+        <dd>{{ report.model_settings.state_forgetting }}</dd>
+      </div>
+      <div>
+        <dt>Model terms</dt>
+        <dd>
+          {% for term in report.model_settings.model_terms %}
+            <span class="summary-chip">{{ term }}</span>
+          {% else %}
+            -
+          {% endfor %}
+        </dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+{% if report.plots.main %}
+  <section class="method-results-section report-card">
+    {% for output in report.plots.main %}
+      {{ render_result_output(output) }}
+    {% endfor %}
+  </section>
+{% endif %}
+
+{% if report.plots.diagnostics %}
+  <section class="method-results-group report-card">
+    <div class="method-results-heading">
+      <div>
+        <p class="eyebrow">Diagnostics</p>
+        <h2>Saved diagnostics</h2>
+      </div>
+    </div>
+    <div class="method-results-grid">
+      {% for output in report.plots.diagnostics %}
+        {{ render_result_output(output) }}
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+{% if report.plots.advanced %}
+  <section class="method-results-group report-card">
+    <div class="method-results-heading">
+      <div>
+        <p class="eyebrow">Advanced results</p>
+        <h2>Saved advanced outputs</h2>
+      </div>
+    </div>
+    <div class="method-results-grid">
+      {% for output in report.plots.advanced %}
+        {{ render_result_output(output) }}
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+{% if report.diagnostics.positivity %}
+  <section class="panel report-card">
+    <p class="eyebrow">Metadata</p>
+    <h2>Positivity validation</h2>
+    <div class="positivity-list">
+      {% for row in report.diagnostics.positivity %}
+        <article>
+          <strong>{{ row.duration }} day{% if row.duration != 1 %}s{% endif %}</strong>
+          <span>{{ row.observed }}/{{ row.possible }}</span>
+          <div class="probability-track">
+            <div class="probability-fill" style="width: {{ row.width_percent }}%"></div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+{% endblock %}

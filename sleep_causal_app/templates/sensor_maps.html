@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="header">
+  <div>
+    <p class="eyebrow">Configured Home Assistant entities</p>
+    <h1>Sensor maps</h1>
+  </div>
+</section>
+
+<section class="panel add-sensor-panel">
+  <div class="panel-heading">
+    <div>
+      <h2>Add sensor</h2>
+      <p class="muted">Classify each entity as a sleep outcome or a non-sleep covariate.</p>
+    </div>
+  </div>
+  <form method="post" action="{{ url_for('add_sensor_map') }}" class="add-sensor-form">
+    <label>
+      Sensor
+      <input name="sensor" placeholder="sensor.example" autocomplete="off">
+    </label>
+    <label>
+      Role
+      <select name="role">
+        <option value="covariate" selected>Covariate</option>
+        <option value="outcome">Outcome</option>
+      </select>
+    </label>
+    <label>
+      Description
+      <input name="description" placeholder="What this sensor represents" autocomplete="off">
+    </label>
+    <button type="submit">Add sensor</button>
+  </form>
+</section>
+
+<section class="panel">
+  <form method="post" action="{{ url_for('save_sensor_maps') }}" class="settings-form">
+    <div class="table-wrap">
+      <table class="sensor-map-table">
+        <thead>
+          <tr>
+            <th>Sensor</th>
+            <th>Role</th>
+            <th>Description</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in config.sensor_maps %}
+            <tr>
+              <td>
+                <input name="sensor" value="{{ row.sensor }}" autocomplete="off">
+              </td>
+              <td>
+                <select name="role">
+                  <option value="outcome" {% if row.role == "outcome" %}selected{% endif %}>Outcome</option>
+                  <option value="covariate" {% if row.role == "covariate" %}selected{% endif %}>Covariate</option>
+                </select>
+              </td>
+              <td>
+                <textarea name="description" rows="2">{{ row.description }}</textarea>
+              </td>
+              <td>
+                <button
+                  class="button small-button"
+                  type="submit"
+                  form="remove-{{ loop.index }}">
+                  Remove
+                </button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <button type="submit">Save sensor maps</button>
+  </form>
+
+  {% for row in config.sensor_maps %}
+    <form
+      id="remove-{{ loop.index }}"
+      method="post"
+      action="{{ url_for('remove_sensor_map') }}"
+      class="hidden-form">
+      <input type="hidden" name="sensor" value="{{ row.sensor }}">
+    </form>
+  {% endfor %}
+</section>
+{% endblock %}

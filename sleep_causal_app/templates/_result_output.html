@@ -1,0 +1,111 @@
+{% macro render_result_output(output) %}
+  <section class="panel result-card method-result-card method-result-{{ output.kind }}">
+    <div class="method-card-heading">
+      <div>
+        <p class="eyebrow">{{ output.id | replace("_", " ") }}</p>
+        <h2>{{ output.title }}</h2>
+        {% if output.subtitle %}
+          <p class="muted">{{ output.subtitle }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if output.kind == "line_chart" %}
+      {% set chart = output.chart %}
+      <div class="method-line-chart" aria-label="{{ output.title }}">
+        <div class="prediction-y-axis" aria-hidden="true">
+          {% for tick in chart.y_ticks %}
+            <span style="top: {{ tick.y }}%">{{ tick.label }}</span>
+          {% endfor %}
+        </div>
+        <div class="method-chart-plot">
+          <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" role="img" aria-label="{{ output.title }}">
+            {% for tick in chart.y_ticks %}
+              <line class="prediction-gridline" x1="0" x2="1000" y1="{{ tick.y * 10 }}" y2="{{ tick.y * 10 }}"></line>
+            {% endfor %}
+            {% for series in chart.series %}
+              <polyline class="method-chart-line {{ series.class }}" points="{{ series.polyline }}"></polyline>
+            {% endfor %}
+          </svg>
+          <div class="prediction-x-axis" aria-hidden="true">
+            {% for tick in chart.x_ticks %}
+              <span style="left: {{ tick.x }}%">{{ tick.label }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="method-chart-legend">
+        {% for series in chart.series %}
+          <span class="{{ series.class }}"><i></i>{{ series.label }}</span>
+        {% endfor %}
+      </div>
+    {% elif output.kind == "love_plot" %}
+      <div class="love-plot" aria-label="{{ output.title }}">
+        {% for row in output.rows %}
+          <div class="love-row">
+            <strong>{{ row.label }}</strong>
+            <div class="love-bars">
+              <span class="love-bar before" style="width: {{ row.before_width }}%"></span>
+              <span class="love-bar after" style="width: {{ row.after_width }}%"></span>
+            </div>
+            <span>{{ row.before }} → {{ row.after }}</span>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="method-chart-legend">
+        <span class="series-observed"><i></i>Before weighting</span>
+        <span class="series-treatment"><i></i>After weighting</span>
+      </div>
+    {% elif output.kind == "histogram" %}
+      <div class="method-histogram" aria-label="{{ output.title }}">
+        {% for bin in output.bins %}
+          <div class="method-histogram-bin" title="{{ bin.label }}: {{ bin.count }}">
+            <span style="height: {{ bin.height }}%"></span>
+            <small>{{ bin.label }}</small>
+          </div>
+        {% endfor %}
+      </div>
+      {% if output.x_label %}
+        <p class="axis-caption">{{ output.x_label }}</p>
+      {% endif %}
+    {% elif output.kind == "ess_summary" %}
+      <div class="ess-grid">
+        {% for row in output.rows %}
+          <article>
+            <span>{{ row.label }}</span>
+            <strong>{{ row.value if row.value is not none else "-" }}</strong>
+          </article>
+        {% endfor %}
+      </div>
+    {% elif output.kind == "counterfactual_table" %}
+      <table class="counterfactual-table">
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Mean outcome</th>
+            <th>Interpretation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in output.rows %}
+            <tr>
+              <td>{{ row.component }}</td>
+              <td>{{ row.mean }}</td>
+              <td>{{ row.detail }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% elif output.kind == "influence_diagnostics" %}
+      <div class="influence-list">
+        {% for row in output.rows %}
+          <div class="influence-row">
+            <strong>{{ row.label }}</strong>
+            <span><i style="width: {{ row.width }}%"></i></span>
+            <em>{{ row.value }}</em>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </section>
+{% endmacro %}

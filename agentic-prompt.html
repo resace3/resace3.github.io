@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Agentic Prompt App concept showing a health plotting prompt and generated sleep analysis outputs.">
+  <title>Agentic Prompt App | Nick Rezaee</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="agentic-prompt.css">
+</head>
+<body class="agentic-page">
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary navigation">
+      <div class="brand-group">
+        <a class="brand" href="index.html" aria-label="Nick Rezaee home">Nick Rezaee</a>
+        <a class="new-projects-badge" href="new-projects.html">New Projects</a>
+      </div>
+      <div class="nav-links">
+        <a href="index.html#experience">Experience</a>
+        <a href="index.html#skills">Skills</a>
+        <a href="index.html#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="agentic-shell">
+    <section class="agentic-hero" aria-label="Agentic Prompt App demo">
+      <div class="agentic-copy">
+        <p class="section-kicker">AI Workflow Project</p>
+        <h1>Agentic Prompt App</h1>
+        <p>Static concept for turning a health-analysis request into structured outputs, plots, and review notes.</p>
+        <a class="dev-note" href="https://github.com/resace3/Agentic_Prompt_App" target="_blank" rel="noreferrer">
+          Still in development: view on GitHub
+        </a>
+      </div>
+
+      <div class="agentic-demo" aria-label="Animated prompt and generated health plot response">
+        <section class="prompt-side" aria-label="Prompt being written">
+          <div class="person-strip">
+            <div class="person-avatar" aria-hidden="true">
+              <span></span>
+            </div>
+            <div>
+              <strong>Health researcher</strong>
+              <p>Preparing a reusable plotting prompt</p>
+            </div>
+          </div>
+
+          <div class="prompt-window">
+            <div class="window-bar" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+            <div class="prompt-label">Prompt</div>
+            <p class="typed-line" aria-label="Create health plots for sleep duration, steps, and mood over the last 90 days.">
+              <span>Create health plots for sleep</span>
+              <span>duration, steps, and mood</span>
+              <span>over the last 90 days.</span>
+            </p>
+            <div class="prompt-tags" aria-label="Prompt structure">
+              <span>role: analyst</span>
+              <span>data: sleep</span>
+              <span>output: plots</span>
+            </div>
+          </div>
+
+        </section>
+
+        <section class="response-side" aria-label="Generated response with sleep health plots">
+          <div class="response-header">
+            <div>
+              <p class="section-kicker">Returned Output</p>
+              <h2>Sleep Health Plots</h2>
+            </div>
+            <div class="status-pill" aria-label="Generated status">
+              <span></span>
+              Generated
+            </div>
+          </div>
+
+          <div class="plot-grid">
+            <article class="plot-card sleep-trend">
+              <div class="plot-heading">
+                <strong>Sleep Duration</strong>
+                <span>hours/night</span>
+              </div>
+              <div class="bar-plot" aria-hidden="true">
+                <i style="--h: 44%; --d: 0ms"></i>
+                <i style="--h: 58%; --d: 80ms"></i>
+                <i style="--h: 51%; --d: 160ms"></i>
+                <i style="--h: 70%; --d: 240ms"></i>
+                <i style="--h: 64%; --d: 320ms"></i>
+                <i style="--h: 76%; --d: 400ms"></i>
+                <i style="--h: 68%; --d: 480ms"></i>
+              </div>
+            </article>
+
+            <article class="plot-card steps-mood">
+              <div class="plot-heading">
+                <strong>Steps + Mood</strong>
+                <span>daily pattern</span>
+              </div>
+              <svg class="line-plot" viewBox="0 0 280 126" role="img" aria-label="Animated line plot for steps and mood">
+                <path class="line-fill" d="M18 98 C48 74 72 82 102 57 C132 33 160 54 190 38 C219 23 243 49 266 31 L266 112 L18 112 Z"></path>
+                <path class="line-a" d="M18 98 C48 74 72 82 102 57 C132 33 160 54 190 38 C219 23 243 49 266 31"></path>
+                <path class="line-b" d="M18 74 C49 80 72 67 103 76 C134 86 158 68 190 70 C218 72 243 59 266 65"></path>
+              </svg>
+            </article>
+
+            <article class="plot-card insight-card">
+              <div class="plot-heading">
+                <strong>Generated Notes</strong>
+                <span>review</span>
+              </div>
+              <ul>
+                <li>Sleep under 6.5 hours clusters with lower mood.</li>
+                <li>Higher step days are followed by steadier sleep.</li>
+                <li>Flag short-sleep nights for causal follow-up.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

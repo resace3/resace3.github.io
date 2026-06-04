@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+{% block content %}
+{% from "_result_output.html" import render_result_output %}
+<section class="header title-header">
+  <div>
+    <h1>N of 1 Causal Analysis Engine</h1>
+  </div>
+</section>
+
+{% include "_dag_editor.html" %}
+
+<section class="workflow-section workflow-analysis-section is-analysis-collapsed" data-analysis-section>
+  <div class="workflow-heading analysis-workflow-heading">
+    <div>
+      <p class="workflow-step-label">Step 2</p>
+      <h2>
+        <button class="section-toggle" type="button" aria-expanded="false" aria-label="Expand causal analysis" title="Expand causal analysis" data-analysis-tools-toggle></button>
+        Causal Analysis
+      </h2>
+      <p class="muted">Choose the causal method, run the model, and review the effect estimates and plots.</p>
+    </div>
+  </div>
+
+  <div id="analysis-tools-body" class="analysis-tools-shell" data-analysis-tools-body>
+  <div class="workbench" data-analysis-workbench>
+    <aside class="panel workbench-controls">
+      <div class="panel-heading compact-heading">
+      <div>
+        <h2>Analysis setup</h2>
+        <p class="muted">Define the outcome, exposure, relevant history, and covariates.</p>
+      </div>
+      </div>
+      <form
+        method="post"
+        action="{{ url_for('run_analysis') }}"
+        class="settings-form"
+        data-analysis-form
+        data-autosave-url="{{ url_for('autosave_settings') }}">
+        <input name="analysis_window_days" type="hidden" value="{{ config.analysis_window_days }}" data-analysis-days-secondary>
+
+      <label>
+        Causal inference method
+        <select name="analysis_method" data-analysis-method>
+          {% for value, method in analysis_methods.items() %}
+            <option value="{{ value }}" {% if config.analysis_method == value %}selected{% endif %}>{{ method.label }}</option>
+          {% endfor %}
+        </select>
+        <span class="shadow-text">Methods available from the DAG: IPW, G-formula, and doubly robust estimation.</span>
+      </label>
+      <div class="method-equation" data-method-equation aria-live="polite"></div>
+
+      <input type="hidden" name="sleep_sensor" value="{{ config.sleep_sensor }}" data-outcome-sensor>
+      <input type="hidden" name="outcome_operator" value="{{ config.outcome_operator }}" data-outcome-operator>
+      <input type="hidden" name="outcome_threshold" value="{{ config.outcome_threshold }}" data-threshold-input>
+      <input type="hidden" name="exposure_sensor" value="{{ config.exposure_sensor }}">
+      <input type="hidden" name="exposure_aggregation" value="{{ config.exposure_aggregation }}">
+      <input type="hidden" name="exposure_operator" value="{{ config.exposure_operator }}">
+      <input type="hidden" name="exposure_threshold" value="{{ config.exposure_threshold }}">
+      <input type="hidden" name="state_forgetting" value="{{ config.state_forgetting }}">
+      <input type="hidden" name="max_lag_days" value="{{ config.max_lag_days }}">
+      <input type="hidden" name="sleep_start_sensor" value="{{ config.sleep_start_sensor }}">
+      <input type="hidden" name="exclude_before_sleep_start_minutes" value="{{ config.exclude_before_sleep_start_minutes }}">
+
+      <datalist id="covariate-sensor-options">
+        {% for row in config.sensor_maps if row.role == "covariate" %}
+          <option value="{{ row.sensor }}">Covariate · {{ row.description }}</option>
+        {% endfor %}
+        {% for row in config.sensor_maps if row.role == "outcome" %}
+          <option value="{{ row.sensor }}">Sleep sensor · previous-night predictor · {{ row.description }}</option>
+        {% endfor %}
+      </datalist>
+      <datalist id="all-sensor-options">
+        {% for row in config.sensor_maps %}
+          <option value="{{ row.sensor }}">{{ row.role }} · {{ row.description }}</option>
+        {% endfor %}
+      </datalist>
+      {% for predictor in config.predictor_settings %}
+        <input type="hidden" name="predictor_entities" value="{{ predictor.entity }}">
+        <input type="hidden" name="predictor_aggregations" value="{{ predictor.aggregation }}">
+        <input type="hidden" name="predictor_day_offsets" value="{{ predictor.day_offset }}">
+      {% endfor %}
+
+        <button class="primary" type="submit" data-run-analysis-button {% if not preview.ready %}disabled{% endif %}>Run analysis</button>
+      </form>
+    </aside>
+
+    <button
+      class="workbench-resizer"
+      type="button"
+      aria-label="Resize analysis setup panel"
+      title="Drag to resize setup panel"
+      data-workbench-resizer>
+      <span></span>
+    </button>
+
+    <main id="analysis-results" class="workbench-output analysis-results" data-analysis-results>
+    <div class="panel workbench-running" data-workbench-loading aria-live="polite">
+      <div class="analysis-progress" data-analysis-progress>
+        <div class="analysis-progress-heading">
+          <span class="spinner" aria-hidden="true"></span>
+          <div>
+            <h2>Running analysis</h2>
+            <p class="muted" data-analysis-progress-message>Starting the analysis workflow.</p>
+          </div>
+        </div>
+        <div class="analysis-step-tabs" role="tablist" aria-label="Analysis run steps">
+          <span class="analysis-step-tab active" data-progress-step="0">Fetch history</span>
+          <span class="analysis-step-tab" data-progress-step="1">Build variables</span>
+          <span class="analysis-step-tab" data-progress-step="2">Estimate effects</span>
+          <span class="analysis-step-tab" data-progress-step="3">Check positivity</span>
+          <span class="analysis-step-tab" data-progress-step="4">Build plots</span>
+          <span class="analysis-step-tab" data-progress-step="5">Build diagnostics</span>
+          <span class="analysis-step-tab" data-progress-step="6">Validate outputs</span>
+          <span class="analysis-step-tab" data-progress-step="7">Format report</span>
+          <span class="analysis-step-tab" data-progress-step="8">Render results</span>
+        </div>
+      </div>
+    </div>
+
+    {% if result is defined %}
+      {% if not result.ok %}
+        <section class="panel result-card analysis-progress-card">
+          <div class="analysis-step-tabs complete" role="tablist" aria-label="Analysis run steps">
+            <span class="analysis-step-tab complete">Fetch history</span>
+            <span class="analysis-step-tab complete">Build variables</span>
+            <span class="analysis-step-tab complete">Estimate effects</span>
+            <span class="analysis-step-tab complete">Check positivity</span>
+            <span class="analysis-step-tab active">Review issue</span>
+          </div>
+        </section>
+        <section class="panel result-card">
+          <h2>Analysis could not run</h2>
+          <p>{{ result.message }}</p>
+        </section>
+      {% else %}
+        {% set method_outputs = result.method_outputs %}
+        {% set primary_output = method_outputs.primary[0] if method_outputs.primary else none %}
+        <section class="panel result-card effect-estimate-card method-primary-result">
+          <div class="result-section-heading">
+            <div>
+              <p class="eyebrow">{{ result.analysis_method_label }}</p>
+              <h2>{{ primary_output.title if primary_output else "Treatment effect estimate" }}</h2>
+              <p class="muted">{{ primary_output.subtitle if primary_output else result.exposure_label ~ " on " ~ result.outcome_label }}</p>
+            </div>
+          </div>
+          <div class="effect-estimate">
+            <strong>{{ primary_output.estimate if primary_output else result.latest_effect.contemporaneous }}</strong>
+            <span>95% CI {{ primary_output.lower if primary_output else result.latest_effect.lower }} to {{ primary_output.upper if primary_output else result.latest_effect.upper }}</span>
+            {% if primary_output and primary_output.date %}
+              <small>Latest estimate through {{ primary_output.date }}</small>
+            {% endif %}
+          </div>
+          {% if primary_output and primary_output.interpretation %}
+            <p class="effect-interpretation">{{ primary_output.interpretation }}</p>
+          {% endif %}
+        </section>
+
+        {% if result.result_validation_errors %}
+          <section class="panel result-card result-validation-card">
+            <p class="eyebrow">Output validation</p>
+            <h2>Some expected method outputs could not be generated</h2>
+            <div class="result-validation-list">
+              {% for error in result.result_validation_errors %}
+                <article>
+                  <strong>{{ error.label }}</strong>
+                  <p>{{ error.message }}</p>
+                </article>
+              {% endfor %}
+            </div>
+          </section>
+        {% endif %}
+
+        {% if method_outputs.main %}
+          <div class="method-results-section">
+            {% for output in method_outputs.main %}
+              {{ render_result_output(output) }}
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% if method_outputs.diagnostics %}
+          <section class="method-results-group">
+            <div class="method-results-heading">
+              <div>
+                <p class="eyebrow">Diagnostics</p>
+                <h2>Method-specific diagnostics</h2>
+              </div>
+            </div>
+            <div class="method-results-grid">
+              {% for output in method_outputs.diagnostics %}
+                {{ render_result_output(output) }}
+              {% endfor %}
+            </div>
+          </section>
+        {% endif %}
+
+        {% if method_outputs.advanced %}
+          <details class="panel result-card advanced-results-card">
+            <summary>
+              <span>
+                <strong>Advanced results</strong>
+                <small>Effect distributions, sensitivity checks, and influence diagnostics when available.</small>
+              </span>
+            </summary>
+            <div class="method-results-grid advanced-results-grid">
+              {% for output in method_outputs.advanced %}
+                {{ render_result_output(output) }}
+              {% endfor %}
+            </div>
+          </details>
+        {% endif %}
+      {% endif %}
+    {% else %}
+      <section class="panel workbench-empty">
+        <h2>Analysis output</h2>
+        <p class="muted">Run the model from the setup panel to load the setup summary and prediction-over-time chart here.</p>
+      </section>
+    {% endif %}
+    </main>
+  </div>
+  </div>
+</section>
+
+{% endblock %}

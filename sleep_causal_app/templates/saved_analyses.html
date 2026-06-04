@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="header">
+  <div>
+    <p class="eyebrow">Immutable reports</p>
+    <h1>Saved analyses</h1>
+    <p class="muted">Saved analyses are historical report snapshots. They cannot be loaded, restored, or edited.</p>
+  </div>
+</section>
+
+<section class="saved-analysis-list">
+  {% if config.saved_analyses %}
+    {% for analysis in config.saved_analyses %}
+      {% set report = analysis.snapshot if analysis.snapshot is defined else none %}
+      {% set metadata = report.metadata if report else {} %}
+      <article class="panel saved-analysis-row">
+        <div>
+          <h2>{{ analysis.name }}</h2>
+          <p class="muted">
+            {{ analysis.created_at if analysis.created_at is defined else "Saved analysis" }}
+            {% if metadata.analysis_method_label is defined %} · {{ metadata.analysis_method_label }}{% endif %}
+          </p>
+          <div class="saved-analysis-meta">
+            <em>{{ metadata.rows if metadata.rows is defined else analysis.rows if analysis.rows is defined else "-" }} rows</em>
+            <em>{{ metadata.analysis_window_days if metadata.analysis_window_days is defined else "-" }} days</em>
+            <em>Immutable</em>
+          </div>
+        </div>
+        <div class="saved-analysis-actions">
+          <a class="button small-button" href="{{ url_for('saved_analysis_report', analysis_id=analysis.id) }}">View report</a>
+          <a class="button small-button" href="{{ url_for('download_saved_analysis_pdf', analysis_id=analysis.id) }}">Download PDF</a>
+          <form method="post" action="{{ url_for('delete_saved_analysis', analysis_id=analysis.id) }}">
+            <button class="button small-button danger-button" type="submit">Delete analysis</button>
+          </form>
+        </div>
+      </article>
+    {% endfor %}
+  {% else %}
+    <section class="panel">
+      <p class="empty-state">No analyses saved yet.</p>
+    </section>
+  {% endif %}
+</section>
+{% endblock %}

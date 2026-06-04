@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="header">
+  <div>
+    <p class="eyebrow">Prediction results</p>
+    <h1>Fitbit sleep prediction</h1>
+  </div>
+  <a class="button" href="{{ url_for('index') }}">Back</a>
+</section>
+
+{% if not result.ok %}
+  <section class="panel">
+    <h2>Not enough data</h2>
+    <p>{{ result.message }}</p>
+  </section>
+{% else %}
+  <section class="metrics">
+    <article>
+      <span>{{ result.rows }}</span>
+      <p>daily rows</p>
+    </article>
+    <article>
+      <span>{{ result.cross_val_accuracy }}</span>
+      <p>cross-val accuracy</p>
+    </article>
+    <article>
+      <span>{{ result.cross_val_brier }}</span>
+      <p>cross-val Brier</p>
+    </article>
+  </section>
+
+  <section class="panel">
+    <h2>Covariate prediction signals</h2>
+    <p class="muted">{{ result.outcome_label }} · {{ result.date_start }} through {{ result.date_end }}</p>
+    <div class="metrics secondary-metrics">
+      <article>
+        <span>{{ result.positive_rate }}</span>
+        <p>event rate</p>
+      </article>
+      <article>
+        <span>{{ result.accuracy }}</span>
+        <p>in-sample accuracy</p>
+      </article>
+      <article>
+        <span>{{ result.baseline_accuracy }}</span>
+        <p>baseline accuracy</p>
+      </article>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Covariate</th>
+          <th>Outcome correlation</th>
+          <th>Log-odds effect</th>
+          <th>Prediction importance</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in result.associations %}
+          <tr>
+            <td>{{ row.entity }}</td>
+            <td>{{ row.correlation }}</td>
+            <td>{{ row.log_odds_effect }}</td>
+            <td>{{ row.importance }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h2>Predicted probability over time</h2>
+    <div class="probability-plot" aria-label="Predicted probability over time">
+      {% for point in result.probability_plot %}
+        <div class="probability-row">
+          <span>{{ point.date }}</span>
+          <div class="probability-track">
+            <div class="probability-fill" style="width: {{ point.probability_percent }}%"></div>
+          </div>
+          <strong>{{ point.probability_percent }}%</strong>
+          <em class="{% if point.actual %}event{% endif %}">{{ "event" if point.actual else "no event" }}</em>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Covariate importance plot</h2>
+    <div class="importance-plot" aria-label="Covariate importance">
+      {% for row in result.importance_plot %}
+        <div class="importance-row">
+          <span>{{ row.entity }}</span>
+          <div class="importance-track">
+            <div class="importance-fill" style="width: {{ row.width_percent }}%"></div>
+          </div>
+          <strong>{{ row.importance }}</strong>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel compact">
+    <h2>Interpretation</h2>
+    <p>{{ result.prediction_note }}</p>
+  </section>
+{% endif %}
+{% endblock %}
