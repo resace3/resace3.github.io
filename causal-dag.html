@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Causal DAG Builder preview by Nick Rezaee for mood, sleep, and steps causal reasoning.">
+  <title>Causal DAG Builder | Nick Rezaee</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="dag.css">
+</head>
+<body class="dag-page">
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary navigation">
+      <div class="brand-group">
+        <a class="brand" href="index.html" aria-label="Nick Rezaee home">Nick Rezaee</a>
+        <a class="new-projects-badge" href="new-projects.html">New Projects</a>
+      </div>
+      <div class="nav-links">
+        <a href="index.html#experience">Experience</a>
+        <a href="index.html#skills">Skills</a>
+        <a href="index.html#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="dag-shell">
+    <section class="dag-hero" aria-label="Causal DAG Builder preview">
+      <p class="section-kicker">Causal Inference Project</p>
+      <h1>Causal DAG Builder</h1>
+      <p>Static GitHub Pages preview of a simple mood-analysis DAG. The full local demo runs as a Flask app through the development proxy.</p>
+    </section>
+
+    <section class="dag-workspace" aria-label="Static causal DAG preview">
+      <aside class="dag-panel">
+        <div class="panel-section">
+          <p class="panel-label">Example Question</p>
+          <h2>How might sleep affect mood?</h2>
+          <p>Use a directed acyclic graph to make the assumed exposure, outcome, and confounder explicit before running a causal analysis.</p>
+        </div>
+
+        <div class="metric-grid">
+          <div>
+            <span>Exposure</span>
+            <strong>Sleep duration</strong>
+          </div>
+          <div>
+            <span>Outcome</span>
+            <strong>Mood score</strong>
+          </div>
+          <div>
+            <span>Confounder</span>
+            <strong>Steps</strong>
+          </div>
+          <div>
+            <span>Data Mode</span>
+            <strong>Demo</strong>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <p class="panel-label">GitHub Pages</p>
+          <h3>Static preview</h3>
+          <p>GitHub Pages cannot run the Python Flask app, so this page provides a deploy-safe preview instead of a 404.</p>
+        </div>
+      </aside>
+
+      <section class="dag-stage" aria-label="Simple DAG about sleep and mood">
+        <div class="stage-header">
+          <div>
+            <h2>Three-node DAG</h2>
+            <span>Forward arrows show assumed causal direction.</span>
+          </div>
+          <span class="dag-status-pill">Acyclic</span>
+        </div>
+
+        <svg id="dag-canvas" viewBox="0 0 860 520" role="img" aria-label="Steps affect sleep duration and mood score. Sleep duration affects mood score.">
+          <defs>
+            <marker id="arrowhead" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
+              <path d="M2 2 L12 7 L2 12 Z"></path>
+            </marker>
+          </defs>
+
+          <path class="dag-edge static-dag-edge delay-0" d="M240 166 C310 150 372 150 442 166"></path>
+          <path class="dag-edge static-dag-edge delay-1" d="M240 216 C362 300 484 316 606 256"></path>
+          <path class="dag-edge static-dag-edge delay-2" d="M560 190 C598 194 622 206 646 226"></path>
+
+          <g class="dag-node static-dag-node" transform="translate(100 128)">
+            <rect width="140" height="96" rx="18"></rect>
+            <text x="70" y="42">Steps</text>
+            <text class="node-role" x="70" y="68">Confounder</text>
+          </g>
+
+          <g class="dag-node static-dag-node" transform="translate(442 128)">
+            <rect width="150" height="96" rx="18"></rect>
+            <text x="75" y="39">Sleep</text>
+            <text x="75" y="60">duration</text>
+            <text class="node-role" x="75" y="80">Exposure</text>
+          </g>
+
+          <g class="dag-node static-dag-node" transform="translate(646 218)">
+            <rect width="150" height="96" rx="18"></rect>
+            <text x="75" y="39">Mood</text>
+            <text x="75" y="60">score</text>
+            <text class="node-role" x="75" y="80">Outcome</text>
+          </g>
+        </svg>
+      </section>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

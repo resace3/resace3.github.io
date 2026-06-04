@@ -11,9 +11,10 @@ The repository is published from `main` through GitHub Pages at `resace3.github.
 
 - `index.html`, `new-projects.html`, `agentic-prompt.html`: public site pages
 - `style.css`, `agentic-prompt.css`, `script.js`: site styling and page transitions
-- `sleep_causal_app/`: copied Flask app used for the Causal DAG Builder demo
+- `causal-dag.html`: static GitHub Pages preview for the Causal DAG Builder
+- `sleep_causal_app/`: copied Flask app used for the full local Causal DAG Builder demo
 - `run_sleep_causal_copy.py`: starts the copied Flask app on `127.0.0.1:5051`
-- `dev_proxy.py`: serves the personal website on `0.0.0.0:8000` and proxies `/causal-dag.html` to the Flask app
+- `dev_proxy.py`: serves the personal website on `0.0.0.0:8000` and proxies `/causal-dag.html` to the Flask app during local development
 - `.github/workflows/ci.yml`: GitHub Actions workflow for static, Python, and browser checks
 
 ## Local Development
@@ -93,4 +94,3 @@ It checks:
 - Playwright browser smoke tests for the home page, project pages, Agentic Prompt page, and proxied Causal DAG app
 
 To make sure `main` only updates after checks pass, configure GitHub branch protection for `main` with required pull requests and required status checks.
-

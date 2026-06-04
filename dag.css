@@ -81,6 +81,20 @@
   line-height: 1.55;
 }
 
+.dag-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  border: 1px solid rgba(15, 159, 138, 0.24);
+  border-radius: 999px;
+  padding: 8px 13px;
+  color: #0f766e;
+  background: rgba(240, 253, 250, 0.9);
+  font-weight: 900;
+  white-space: nowrap;
+}
+
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -180,6 +194,19 @@
   marker-end: url("#arrowhead");
 }
 
+.static-dag-edge {
+  stroke-dasharray: 14 10;
+  animation: staticDagFlow 2.8s linear infinite;
+}
+
+.static-dag-edge.delay-1 {
+  animation-delay: 0.35s;
+}
+
+.static-dag-edge.delay-2 {
+  animation-delay: 0.7s;
+}
+
 .dag-edge.is-active {
   animation: edgePulse 900ms ease both;
 }
@@ -232,6 +259,37 @@
   text-transform: uppercase;
 }
 
+.static-dag-node {
+  animation: staticDagNode 3.6s ease-in-out infinite;
+}
+
+.static-dag-node:nth-of-type(2) {
+  animation-delay: 0.35s;
+}
+
+.static-dag-node:nth-of-type(3) {
+  animation-delay: 0.7s;
+}
+
+@keyframes staticDagFlow {
+  to {
+    stroke-dashoffset: -48;
+  }
+}
+
+@keyframes staticDagNode {
+  0%, 100% {
+    transform-box: fill-box;
+    transform-origin: center;
+    scale: 1;
+  }
+  50% {
+    transform-box: fill-box;
+    transform-origin: center;
+    scale: 1.025;
+  }
+}
+
 @keyframes edgePulse {
   0% {
     stroke: rgba(37, 99, 235, 0.28);
@@ -262,7 +320,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .dag-edge.is-active,
-  .dag-flow.is-active {
+  .dag-flow.is-active,
+  .static-dag-edge,
+  .static-dag-node {
     animation: none;
   }
 }
@@ -283,6 +343,34 @@
 }
 
 @media (max-width: 640px) {
+  .dag-page .nav {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .dag-page .brand-group {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .dag-page .brand {
+    font-size: 2.15rem;
+  }
+
+  .dag-page .new-projects-badge {
+    min-height: 42px;
+    padding: 7px 14px;
+    font-size: 1.25rem;
+  }
+
+  .dag-page .nav-links {
+    justify-content: flex-start;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
   .dag-shell {
     width: min(100% - 24px, 1160px);
     padding-top: 30px;
@@ -290,5 +378,9 @@
 
   .metric-grid {
     grid-template-columns: 1fr;
+  }
+
+  #dag-canvas {
+    min-height: 330px;
   }
 }
