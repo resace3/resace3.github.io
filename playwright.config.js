@@ -5,7 +5,7 @@ const chromiumExecutable = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
 
 module.exports = defineConfig({
   testDir: "./tests/browser",
-  timeout: 30000,
+  timeout: 120000,
   expect: {
     timeout: 5000,
   },

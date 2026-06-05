@@ -12,6 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 SLEEP_APP = "http://127.0.0.1:5051"
+STATIC_SNAPSHOT_PREFIX = "/__static/"
 SLEEP_PREFIXES = (
     "/static/",
     "/dag/",
@@ -35,6 +36,8 @@ class DevProxyHandler(http.server.SimpleHTTPRequestHandler):
 
     def translate_path(self, path: str) -> str:
         path = urllib.parse.urlsplit(path).path
+        if path.startswith(STATIC_SNAPSHOT_PREFIX):
+            path = "/" + path[len(STATIC_SNAPSHOT_PREFIX):]
         path = posixpath.normpath(urllib.parse.unquote(path))
         parts = [part for part in path.split("/") if part and part not in (os.curdir, os.pardir)]
         local_path = ROOT

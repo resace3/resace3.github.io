@@ -108,13 +108,272 @@
           };
         }
 
+        function staticAnalysisResultsDocument() {
+          return `<!doctype html>
+<html lang="en">
+  <body>
+    <main id="analysis-results" class="workbench-output analysis-results" data-analysis-results>
+      <section class="panel result-card effect-estimate-card method-primary-result">
+        <div class="result-section-heading">
+          <div>
+            <p class="eyebrow">G-formula / outcome model</p>
+            <h2>Sleep duration and low mood</h2>
+            <p class="muted">Static demo result using the mood, sleep, and steps DAG.</p>
+          </div>
+        </div>
+        <div class="effect-estimate">
+          <strong>-0.42</strong>
+          <span>95% CI -0.63 to -0.18</span>
+          <small>Synthetic 90-day example with sleep as the exposure</small>
+        </div>
+        <p class="effect-interpretation">In this demo, nights above the sleep threshold are followed by fewer low-mood days after adjusting for prior-day steps.</p>
+      </section>
+
+      <div class="method-results-section">
+        <section class="panel result-card method-result-card method-result-ess_summary">
+          <div class="method-card-heading">
+            <div>
+              <p class="eyebrow">setup summary</p>
+              <h2>Model inputs</h2>
+              <p class="muted">Outcome: mood score below 5.7. Exposure: sleep duration above 7 hours. Covariate: prior-day steps.</p>
+            </div>
+          </div>
+          <div class="ess-grid">
+            <article>
+              <span>Days reviewed</span>
+              <strong>90</strong>
+            </article>
+            <article>
+              <span>Exposure days</span>
+              <strong>52</strong>
+            </article>
+            <article>
+              <span>Outcome days</span>
+              <strong>29</strong>
+            </article>
+            <article>
+              <span>Covariates</span>
+              <strong>1</strong>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel result-card method-result-card method-result-line_chart">
+          <div class="method-card-heading">
+            <div>
+              <p class="eyebrow">prediction over time</p>
+              <h2>Predicted probability of low mood</h2>
+              <p class="muted">Counterfactual prediction under higher sleep compared with shorter sleep.</p>
+            </div>
+          </div>
+          <div class="method-line-chart" aria-label="Predicted probability of low mood">
+            <div class="prediction-y-axis" aria-hidden="true">
+              <span style="top: 6%">0.70</span>
+              <span style="top: 36%">0.45</span>
+              <span style="top: 67%">0.20</span>
+              <span style="top: 92%">0.00</span>
+            </div>
+            <div class="method-chart-plot">
+              <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" role="img" aria-label="Static predicted low mood chart">
+                <line class="prediction-gridline" x1="0" x2="1000" y1="80" y2="80"></line>
+                <line class="prediction-gridline" x1="0" x2="1000" y1="380" y2="380"></line>
+                <line class="prediction-gridline" x1="0" x2="1000" y1="680" y2="680"></line>
+                <line class="prediction-gridline" x1="0" x2="1000" y1="920" y2="920"></line>
+                <polyline class="method-chart-line series-observed" points="0,610 120,570 240,640 360,535 480,585 600,500 720,560 840,440 1000,510"></polyline>
+                <polyline class="method-chart-line series-treatment" points="0,700 120,680 240,720 360,650 480,670 600,610 720,640 840,560 1000,590"></polyline>
+              </svg>
+              <div class="prediction-x-axis" aria-hidden="true">
+                <span style="left: 0%">Day 1</span>
+                <span style="left: 50%">Day 45</span>
+                <span style="left: 100%">Day 90</span>
+              </div>
+            </div>
+          </div>
+          <div class="method-chart-legend">
+            <span class="series-observed"><i></i>Observed sleep pattern</span>
+            <span class="series-treatment"><i></i>Sleep over threshold</span>
+          </div>
+        </section>
+
+        <section class="panel result-card method-result-card method-result-counterfactual_table">
+          <div class="method-card-heading">
+            <div>
+              <p class="eyebrow">counterfactual comparison</p>
+              <h2>Estimated mood difference</h2>
+              <p class="muted">Static preview values for the personal website demo.</p>
+            </div>
+          </div>
+          <table class="counterfactual-table">
+            <thead>
+              <tr>
+                <th>Scenario</th>
+                <th>Mean low-mood risk</th>
+                <th>Interpretation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Observed sleep pattern</td>
+                <td>0.48</td>
+                <td>Uses the synthetic sleep and steps history.</td>
+              </tr>
+              <tr>
+                <td>Sleep over 7 hours</td>
+                <td>0.31</td>
+                <td>Lower predicted low-mood risk in this demo.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>`;
+        }
+
+        function staticRequestUrl(input) {
+          return typeof input === "string"
+            ? input
+            : input instanceof URL
+              ? input.href
+              : input?.url || String(input || "");
+        }
+
+        function staticAnalysisError(message) {
+          return `
+            <section class="panel result-card">
+              <h2>Analysis could not run</h2>
+              <p>${String(message || "Unable to run the static analysis demo.").replace(/[<>&"]/g, (char) => ({
+                "<": "&lt;",
+                ">": "&gt;",
+                "&": "&amp;",
+                '"': "&quot;"
+              }[char]))}</p>
+            </section>
+          `;
+        }
+
+        async function runStaticAnalysisInPage(form) {
+          if (form.dataset.staticAnalysisRunning === "1") return;
+
+          const button = form.querySelector("[data-run-analysis-button]");
+          const output = document.querySelector("[data-analysis-results]");
+          const previousContent = button?.innerHTML || "Run Analysis";
+          form.dataset.staticAnalysisRunning = "1";
+
+          if (button) {
+            button.dataset.analysisRunning = "1";
+            button.disabled = true;
+            button.innerHTML = '<span class="button-spinner" aria-hidden="true"></span> Running analysis';
+          }
+
+          if (output) {
+            output.classList.add("is-running");
+            if (typeof startAnalysisProgress === "function") {
+              startAnalysisProgress(output);
+            }
+          }
+
+          try {
+            const dagForm = document.querySelector("[data-dag-form]");
+            await window.fetch(dagForm?.dataset.dagAutosaveUrl || "/dag/autosave", {
+              method: "POST",
+              body: new FormData(dagForm || form),
+              keepalive: true
+            });
+
+            const response = await window.fetch(form.action || "/run", {
+              method: form.method || "POST",
+              body: new FormData(form),
+              headers: { "X-Requested-With": "fetch" }
+            });
+
+            if (!response.ok) {
+              throw new Error(`Analysis request failed with ${response.status}`);
+            }
+
+            const html = await response.text();
+            const parsed = new DOMParser().parseFromString(html, "text/html");
+            const nextOutput = parsed.querySelector("[data-analysis-results]");
+            if (!nextOutput || !output) {
+              throw new Error("Analysis response did not include a results panel.");
+            }
+
+            output.replaceWith(document.importNode(nextOutput, true));
+            const updatedOutput = document.querySelector("[data-analysis-results]");
+            updatedOutput?.classList.remove("is-running");
+            if (typeof fitMethodEquations === "function") {
+              fitMethodEquations(updatedOutput || document);
+            }
+            if (typeof typesetMath === "function") {
+              typesetMath(updatedOutput || document);
+            }
+          } catch (error) {
+            if (output) {
+              output.classList.remove("is-running");
+              output.innerHTML = staticAnalysisError(error?.message);
+            }
+          } finally {
+            delete form.dataset.staticAnalysisRunning;
+            if (button) {
+              delete button.dataset.analysisRunning;
+              button.disabled = false;
+              button.innerHTML = previousContent;
+            }
+            if (typeof updateRunAnalysisButtonState === "function") {
+              updateRunAnalysisButtonState();
+            }
+          }
+        }
+
+        function handleStaticAnalysisEvent(event) {
+          let form = null;
+
+          if (event.type === "submit") {
+            form = event.target.closest?.("[data-analysis-form]");
+          } else {
+            const button = event.target.closest?.("[data-run-analysis-button]");
+            if (!button || button.disabled) return;
+            form = button.closest("[data-analysis-form]");
+          }
+
+          if (!form) return;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          runStaticAnalysisInPage(form);
+        }
+
+        function setStaticAnalysisToolsExpanded(expanded) {
+          const section = document.querySelector("[data-analysis-section]");
+          const body = document.querySelector("[data-analysis-tools-body]");
+          const toggle = document.querySelector("[data-analysis-tools-toggle]");
+          if (!section || !body || !toggle) return;
+
+          toggle.setAttribute("aria-expanded", String(expanded));
+          toggle.setAttribute(
+            "aria-label",
+            expanded ? "Collapse causal analysis" : "Expand causal analysis"
+          );
+          toggle.title = expanded ? "Collapse causal analysis" : "Expand causal analysis";
+          body.hidden = false;
+          section.classList.toggle("is-analysis-collapsed", !expanded);
+        }
+
+        window.setStaticAnalysisToolsExpanded = setStaticAnalysisToolsExpanded;
+
+        document.addEventListener("click", (event) => {
+          const toggle = event.target.closest?.("[data-analysis-tools-toggle]");
+          if (!toggle || typeof setAnalysisToolsExpanded === "function") return;
+
+          event.preventDefault();
+          setStaticAnalysisToolsExpanded(toggle.getAttribute("aria-expanded") === "false");
+        }, true);
+
+        document.addEventListener("submit", handleStaticAnalysisEvent, true);
+        document.addEventListener("click", handleStaticAnalysisEvent, true);
+
         window.fetch = (input, init) => {
-          const requestUrl =
-            typeof input === "string"
-              ? input
-              : input instanceof URL
-                ? input.href
-                : input?.url || String(input || "");
+          const requestUrl = staticRequestUrl(input);
           const url = new URL(requestUrl || "", window.location.href);
 
           if (url.pathname === "/dag/node-histogram") {
@@ -139,7 +398,7 @@
           }
 
           if (url.pathname === "/run") {
-            return Promise.resolve(new Response(document.documentElement.outerHTML, {
+            return Promise.resolve(new Response(staticAnalysisResultsDocument(), {
               status: 200,
               headers: { "Content-Type": "text/html" }
             }));
@@ -627,7 +886,7 @@
         <input type="hidden" name="predictor_day_offsets" value="1">
       
 
-        <button class="primary" type="submit" data-run-analysis-button >Run analysis</button>
+        <button class="primary" type="submit" data-run-analysis-button >Run Analysis</button>
       </form>
     </aside>
 

@@ -60,4 +60,27 @@ def test_demo_analysis_runs(client):
     assert response.status_code == 200
     assert b"N of 1 Causal Analysis Engine" in response.data
     assert b"Sleep duration" in response.data
+    assert b"Treatment effect estimate" in response.data
+    assert b"95% CI" in response.data
+    assert b"Observed vs predicted outcome plot" in response.data
+    assert b"Run the model from the setup panel" not in response.data
 
+
+def test_analysis_setup_uses_run_analysis_button_label(client):
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert b'data-run-analysis-button' in response.data
+    assert b"Run Analysis" in response.data
+
+
+def test_autosave_routes_return_ok_json(client):
+    dag_response = client.post("/dag/autosave")
+    settings_response = client.post("/settings/autosave")
+
+    assert dag_response.status_code == 200
+    assert dag_response.is_json
+    assert dag_response.get_json()["ok"] is True
+    assert settings_response.status_code == 200
+    assert settings_response.is_json
+    assert settings_response.get_json()["ok"] is True

@@ -2545,7 +2545,7 @@ document.addEventListener("submit", async (event) => {
     const saved = await autosaveDagNow(false);
     if (!saved) {
       if (button) {
-        button.innerHTML = previousContent || "Run analysis";
+        button.innerHTML = previousContent || "Run Analysis";
         delete button.dataset.analysisRunning;
       }
       updateRunAnalysisButtonState();
@@ -2933,11 +2933,11 @@ const ONBOARDING_STEPS = [
   {
     selector: "[data-run-analysis-button]",
     title: "Run the analysis",
-    copy: "Click Run analysis to use the current DAG, thresholds, timing, and selected method. The demo data will produce results for this mood example.",
+    copy: "Click Run Analysis to use the current DAG, thresholds, timing, and selected method. The demo data will produce results for this mood example.",
     prepare: () => {
       if (typeof setAnalysisToolsExpanded === "function") setAnalysisToolsExpanded(true);
     },
-    nextLabel: "Run analysis",
+    nextLabel: "Run Analysis",
     action: submitAnalysisFromGuide,
   },
   {
@@ -3023,7 +3023,7 @@ async function runAnalysisInPage(form) {
     if (button) {
       delete button.dataset.analysisRunning;
       button.disabled = false;
-      button.innerHTML = previousContent || "Run analysis";
+      button.innerHTML = previousContent || "Run Analysis";
     }
     if (loading) {
       loading.classList.remove("active");
@@ -3143,7 +3143,9 @@ function initializeOnboarding() {
   window.addEventListener("resize", scheduleOnboardingPosition);
   window.addEventListener("scroll", scheduleOnboardingPosition, { passive: true });
 
-  window.setTimeout(startOnboarding, 750);
+  if (!window.personalWebsiteDisableOnboarding) {
+    window.setTimeout(startOnboarding, 750);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", loadHistogram);

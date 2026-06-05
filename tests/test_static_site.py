@@ -70,4 +70,30 @@ def test_static_causal_dag_snapshot_intercepts_backend_histogram_calls():
 
     assert "window.personalWebsiteStaticDag = true" in html
     assert 'url.pathname === "/dag/node-histogram"' in html
+    assert 'url.pathname === "/dag/autosave" || url.pathname === "/settings/autosave"' in html
+    assert 'url.pathname === "/entities/search"' in html
+    assert 'url.pathname === "/run"' in html
     assert "input instanceof URL" in html
+    assert "document.documentElement.outerHTML" not in html
+
+
+def test_static_causal_dag_snapshot_contains_analysis_result_payload():
+    html = (ROOT / "causal-dag.html").read_text(encoding="utf-8")
+
+    assert "staticAnalysisResultsDocument" in html
+    assert 'data-analysis-results' in html
+    assert "Sleep duration and low mood" in html
+    assert "95% CI -0.63 to -0.18" in html
+    assert "Predicted probability of low mood" in html
+    assert "Estimated mood difference" in html
+
+
+def test_static_causal_dag_snapshot_owns_static_analysis_submit_flow():
+    html = (ROOT / "causal-dag.html").read_text(encoding="utf-8")
+
+    assert "runStaticAnalysisInPage" in html
+    assert 'document.addEventListener("submit", handleStaticAnalysisEvent, true)' in html
+    assert 'document.addEventListener("click", handleStaticAnalysisEvent, true)' in html
+    assert "event.stopImmediatePropagation()" in html
+    assert "Running analysis" in html
+    assert "Saving DAG" not in html
