@@ -308,6 +308,9 @@
             if (typeof typesetMath === "function") {
               typesetMath(updatedOutput || document);
             }
+            if (typeof finishOnboarding === "function") {
+              finishOnboarding();
+            }
           } catch (error) {
             if (output) {
               output.classList.remove("is-running");

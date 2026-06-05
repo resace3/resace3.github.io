@@ -2940,14 +2940,6 @@ const ONBOARDING_STEPS = [
     nextLabel: "Run Analysis",
     action: submitAnalysisFromGuide,
   },
-  {
-    selector: "[data-analysis-results]",
-    title: "Review the results",
-    copy: "Read the output panel for effect estimates, confidence intervals, plots, diagnostics, and any warnings about missing data or model assumptions.",
-    prepare: () => {
-      if (typeof setAnalysisToolsExpanded === "function") setAnalysisToolsExpanded(true);
-    },
-  },
 ];
 
 let onboardingIndex = 0;
@@ -3003,9 +2995,7 @@ async function runAnalysisInPage(form) {
 
     if (onboardingResumeAfterAnalysis) {
       onboardingResumeAfterAnalysis = false;
-      const resultIndex = ONBOARDING_STEPS.findIndex((step) => step.selector === "[data-analysis-results]");
-      onboardingIndex = resultIndex >= 0 ? resultIndex : onboardingIndex;
-      renderOnboardingStep();
+      finishOnboarding();
     }
   } catch (error) {
     window.clearInterval(analysisProgressTimer);

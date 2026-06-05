@@ -39,6 +39,26 @@ async function expandCausalAnalysis(page) {
   await expect(page.locator("[data-analysis-form]")).toBeVisible({ timeout: 10000 });
 }
 
+async function startGuide(page) {
+  await page.waitForFunction(() => typeof window.startOnboarding === "function", null, { timeout: 10000 });
+  await page.evaluate(() => window.startOnboarding());
+  await expect(page.locator("[data-onboarding-overlay]")).toBeVisible({ timeout: 10000 });
+}
+
+async function advanceGuideToTitle(page, titlePattern) {
+  const title = page.locator("[data-onboarding-title]");
+  const next = page.locator("[data-onboarding-next]");
+
+  for (let step = 0; step < 20; step += 1) {
+    const currentTitle = await title.innerText({ timeout: 10000 });
+    if (titlePattern.test(currentTitle)) return;
+    await next.evaluate((button) => button.click());
+    await page.waitForTimeout(220);
+  }
+
+  throw new Error(`Guide did not reach ${titlePattern}`);
+}
+
 test.beforeEach(async ({ page }) => {
   const errors = [];
   pageErrors.set(page, errors);
@@ -162,6 +182,42 @@ test("static causal DAG snapshot runs analysis without a backend", async ({ page
     window.__staticFetchCalls.map((call) => new URL(call.url, window.location.href).pathname)
   );
   expect(fetchPaths).toContain("/dag/autosave");
+  expect(fetchPaths).toContain("/run");
+});
+
+test("static causal DAG guide closes after guided analysis run", async ({ page }) => {
+  test.setTimeout(120000);
+  await page.goto("/__static/causal-dag.html", { waitUntil: "domcontentloaded" });
+  await startGuide(page);
+  await advanceGuideToTitle(page, /Run the analysis/i);
+
+  await expect(page.locator("[data-onboarding-count]")).toContainText("Guide 14 of 14");
+  await page.evaluate(() => {
+    window.__staticFetchCalls = [];
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = (input, init) => {
+      const requestUrl =
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.href
+            : input?.url || String(input || "");
+      window.__staticFetchCalls.push({ url: requestUrl, method: init?.method || "GET" });
+      return originalFetch(input, init);
+    };
+  });
+
+  await page.locator("[data-onboarding-next]").evaluate((button) => button.click());
+
+  const results = page.locator("[data-analysis-results]");
+  await expect(results).toContainText("Sleep duration and low mood", { timeout: 15000 });
+  const resultText = await results.innerText();
+  expect(resultText).toContain("95% CI -0.63 to -0.18");
+  await expect(page.locator("[data-onboarding-overlay]")).toBeHidden({ timeout: 10000 });
+
+  const fetchPaths = await page.evaluate(() =>
+    window.__staticFetchCalls.map((call) => new URL(call.url, window.location.href).pathname)
+  );
   expect(fetchPaths).toContain("/run");
 });
 
