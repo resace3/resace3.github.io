@@ -63,23 +63,21 @@
             values: [4450, 5380, 6120, 6840, 7310, 7760, 8120, 8460, 8910, 9340, 9820, 10420, 10980]
           },
           "sensor.nick_r_mood_score": {
-            minimum: 3.8,
-            maximum: 8.2,
-            mean: 5.9,
-            median: 5.8,
-            std_dev: 0.86,
+            minimum: 28,
+            maximum: 41,
+            mean: 34.1,
+            median: 34,
+            std_dev: 3.0,
             aggregation: "last",
             day_lag: 0,
             bins: [
-              [3.8, 4.4, 5],
-              [4.4, 5.0, 12],
-              [5.0, 5.6, 18],
-              [5.6, 6.2, 24],
-              [6.2, 6.8, 17],
-              [6.8, 7.4, 10],
-              [7.4, 8.2, 4]
+              [28, 30, 8],
+              [31, 33, 25],
+              [34, 36, 33],
+              [37, 39, 21],
+              [40, 41, 3]
             ],
-            values: [4.0, 4.6, 5.0, 5.3, 5.6, 5.8, 6.0, 6.2, 6.5, 6.9, 7.3, 8.0]
+            values: [28, 30, 31, 32, 33, 34, 34, 35, 36, 37, 39, 41]
           }
         };
 
@@ -135,7 +133,7 @@
             <div>
               <p class="eyebrow">setup summary</p>
               <h2>Model inputs</h2>
-              <p class="muted">Outcome: mood score below 5.7. Exposure: sleep duration above 7 hours. Covariate: prior-day steps.</p>
+              <p class="muted">Outcome (Dependent): PANAS Score below 33. Exposure (Independent): sleep duration above 7 hours. Covariate: prior-day steps.</p>
             </div>
           </div>
           <div class="ess-grid">
@@ -144,12 +142,12 @@
               <strong>90</strong>
             </article>
             <article>
-              <span>Exposure days</span>
+              <span>Exposure (Independent) days</span>
               <strong>52</strong>
             </article>
             <article>
-              <span>Outcome days</span>
-              <strong>29</strong>
+              <span>Outcome (Dependent) days</span>
+              <strong>33</strong>
             </article>
             <article>
               <span>Covariates</span>
@@ -430,21 +428,12 @@
     <header class="app-topbar">
       <div class="topbar-inner">
         <div class="brand">
-          <span class="brand-mark">CAE</span>
-          <div>
+          <button class="tab guide-tab brand-guide-tab" type="button" data-onboarding-start>Guide me</button>
+          <div class="brand-copy">
             <strong>N of 1 Causal Analysis Engine</strong>
             <span>N-of-1 causal model</span>
           </div>
         </div>
-        <nav class="tabs" aria-label="Primary">
-          <a
-            class="tab active"
-            href="/causal-dag.html"
-            aria-current="page">
-            Analysis
-          </a>
-          <button class="tab guide-tab" type="button" data-onboarding-start>Guide me</button>
-        </nav>
       </div>
     </header>
     <main class="shell">
@@ -532,9 +521,9 @@
             <label>
               Role
               <select data-sidebar-field="node_role">
-                <option value="exposure">Exposure</option>
+                <option value="exposure">Exposure (Independent)</option>
                 <option value="covariate">Covariate</option>
-                <option value="outcome">Outcome</option>
+                <option value="outcome">Outcome (Dependent)</option>
                 <option value="latent">Latent</option>
               </select>
             </label>
@@ -620,7 +609,7 @@
             <span class="dag-time-shadow" data-node-time-shadow>
               t-1
             </span>
-            <span class="dag-role-shadow" data-node-role-shadow>(exposure)</span>
+            <span class="dag-role-shadow" data-node-role-shadow>Exposure (Independent)</span>
             <input type="hidden" name="node_label" value="Sleep duration" data-node-label-input>
             <input type="hidden" name="node_description" value="" data-node-description>
             <input type="hidden" name="node_id" value="sensor.nick_r_sleep_minutes_asleep" data-node-id-input>
@@ -654,7 +643,7 @@
             <span class="dag-time-shadow" data-node-time-shadow>
               t-1
             </span>
-            <span class="dag-role-shadow" data-node-role-shadow>(covariate)</span>
+            <span class="dag-role-shadow" data-node-role-shadow>Covariate</span>
             <input type="hidden" name="node_label" value="Steps" data-node-label-input>
             <input type="hidden" name="node_description" value="" data-node-description>
             <input type="hidden" name="node_id" value="sensor.nick_r_steps" data-node-id-input>
@@ -684,12 +673,12 @@
             data-node-id="sensor.nick_r_mood_score">
             <input type="hidden" name="node_x" value="578.0" data-node-x>
             <input type="hidden" name="node_y" value="210.0" data-node-y>
-            <strong class="dag-node-title" data-node-title>Mood score</strong>
+            <strong class="dag-node-title" data-node-title>PANAS Score</strong>
             <span class="dag-time-shadow" data-node-time-shadow>
               t
             </span>
-            <span class="dag-role-shadow" data-node-role-shadow>(outcome)</span>
-            <input type="hidden" name="node_label" value="Mood score" data-node-label-input>
+            <span class="dag-role-shadow" data-node-role-shadow>Outcome (Dependent)</span>
+            <input type="hidden" name="node_label" value="PANAS Score" data-node-label-input>
             <input type="hidden" name="node_description" value="" data-node-description>
             <input type="hidden" name="node_id" value="sensor.nick_r_mood_score" data-node-id-input>
             <input type="hidden" name="node_role" value="outcome" data-node-role>
@@ -703,7 +692,7 @@
             <input type="hidden" name="node_day_lag" value="0" data-node-day-lag>
             <input type="hidden" name="node_value_type" value="binary_threshold" data-node-value-type>
             <input type="hidden" name="node_threshold_operator" value="less_than" data-node-threshold-operator>
-            <input type="hidden" name="node_threshold" value="5.7" data-node-threshold>
+            <input type="hidden" name="node_threshold" value="33" data-node-threshold>
             <div class="dag-node-histogram" data-dag-node-histogram hidden></div>
             <button class="dag-connect-handle top" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="top"></button>
             <button class="dag-connect-handle right" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="right"></button>
@@ -720,21 +709,21 @@
 
   <datalist id="dag-sensor-options">
     
-      <option value="sensor.nick_r_mood_score">outcome · Daily mood score on a 0 to 10 scale, where lower values indicate worse mood.</option>
+      <option value="sensor.nick_r_mood_score">Outcome (Dependent) · Daily PANAS summed score on a 10 to 50 scale, where lower values indicate lower affect.</option>
     
-      <option value="sensor.nick_r_awakenings_count">outcome · Number of recorded awakenings during a sleep session.</option>
+      <option value="sensor.nick_r_awakenings_count">Outcome (Dependent) · Number of recorded awakenings during a sleep session.</option>
     
-      <option value="sensor.nick_r_sleep_minutes_awake">outcome · Minutes recorded awake during the sleep window.</option>
+      <option value="sensor.nick_r_sleep_minutes_awake">Outcome (Dependent) · Minutes recorded awake during the sleep window.</option>
     
-      <option value="sensor.nick_r_sleep_time_in_bed">outcome · Total minutes recorded in bed.</option>
+      <option value="sensor.nick_r_sleep_time_in_bed">Outcome (Dependent) · Total minutes recorded in bed.</option>
     
       <option value="sensor.nick_r_sleep_minutes_asleep">covariate · Total minutes asleep during the prior sleep period.</option>
     
-      <option value="sensor.nick_r_sleep_minutes_to_fall_asleep">outcome · Minutes recorded before falling asleep.</option>
+      <option value="sensor.nick_r_sleep_minutes_to_fall_asleep">Outcome (Dependent) · Minutes recorded before falling asleep.</option>
     
-      <option value="sensor.nick_r_sleep_efficiency">outcome · Sleep efficiency percentage from the sleep tracker.</option>
+      <option value="sensor.nick_r_sleep_efficiency">Outcome (Dependent) · Sleep efficiency percentage from the sleep tracker.</option>
     
-      <option value="sensor.nick_r_sleep_start_time">outcome · Reported sleep start time.</option>
+      <option value="sensor.nick_r_sleep_start_time">Outcome (Dependent) · Reported sleep start time.</option>
     
       <option value="binary_sensor.pantry_door_window">covariate · This is my pantry door that I get food out of. On means I opened it, Off means I closed it</option>
     
@@ -788,7 +777,7 @@
       <div class="panel-heading compact-heading">
       <div>
         <h2>Analysis setup</h2>
-        <p class="muted">Define the outcome, exposure, relevant history, and covariates.</p>
+        <p class="muted">Define the Outcome (Dependent), Exposure (Independent), relevant history, and covariates.</p>
       </div>
       </div>
       <form
@@ -805,7 +794,7 @@
           
             <option value="dag_auto" >Choose from DAG</option>
           
-            <option value="g_formula" selected>G-formula / outcome model</option>
+            <option value="g_formula" selected>Default: G-formula / outcome model</option>
           
             <option value="ipw" >Inverse probability weighting (IPW)</option>
           
@@ -818,7 +807,7 @@
 
       <input type="hidden" name="sleep_sensor" value="sensor.nick_r_mood_score" data-outcome-sensor>
       <input type="hidden" name="outcome_operator" value="less_than" data-outcome-operator>
-      <input type="hidden" name="outcome_threshold" value="5.7" data-threshold-input>
+      <input type="hidden" name="outcome_threshold" value="33" data-threshold-input>
       <input type="hidden" name="exposure_sensor" value="sensor.nick_r_sleep_minutes_asleep">
       <input type="hidden" name="exposure_aggregation" value="last">
       <input type="hidden" name="exposure_operator" value="more_than">
@@ -841,7 +830,7 @@
           <option value="binary_sensor.bthome_sensor_ee5c_window">Covariate · This is my refrigerator door that I get food out of in my room. On means I opened it, Off means I closed it</option>
         
         
-          <option value="sensor.nick_r_mood_score">Sleep sensor · previous-night predictor · Daily mood score on a 0 to 10 scale, where lower values indicate worse mood.</option>
+          <option value="sensor.nick_r_mood_score">Sleep sensor · previous-night predictor · Daily PANAS summed score on a 10 to 50 scale, where lower values indicate lower affect.</option>
         
           <option value="sensor.nick_r_awakenings_count">Sleep sensor · previous-night predictor · Number of recorded awakenings during a sleep session.</option>
         
@@ -858,21 +847,21 @@
       </datalist>
       <datalist id="all-sensor-options">
         
-          <option value="sensor.nick_r_mood_score">outcome · Daily mood score on a 0 to 10 scale, where lower values indicate worse mood.</option>
+          <option value="sensor.nick_r_mood_score">Outcome (Dependent) · Daily PANAS summed score on a 10 to 50 scale, where lower values indicate lower affect.</option>
         
-          <option value="sensor.nick_r_awakenings_count">outcome · Number of recorded awakenings during a sleep session.</option>
+          <option value="sensor.nick_r_awakenings_count">Outcome (Dependent) · Number of recorded awakenings during a sleep session.</option>
         
-          <option value="sensor.nick_r_sleep_minutes_awake">outcome · Minutes recorded awake during the sleep window.</option>
+          <option value="sensor.nick_r_sleep_minutes_awake">Outcome (Dependent) · Minutes recorded awake during the sleep window.</option>
         
-          <option value="sensor.nick_r_sleep_time_in_bed">outcome · Total minutes recorded in bed.</option>
+          <option value="sensor.nick_r_sleep_time_in_bed">Outcome (Dependent) · Total minutes recorded in bed.</option>
         
           <option value="sensor.nick_r_sleep_minutes_asleep">covariate · Total minutes asleep during the prior sleep period.</option>
         
-          <option value="sensor.nick_r_sleep_minutes_to_fall_asleep">outcome · Minutes recorded before falling asleep.</option>
+          <option value="sensor.nick_r_sleep_minutes_to_fall_asleep">Outcome (Dependent) · Minutes recorded before falling asleep.</option>
         
-          <option value="sensor.nick_r_sleep_efficiency">outcome · Sleep efficiency percentage from the sleep tracker.</option>
+          <option value="sensor.nick_r_sleep_efficiency">Outcome (Dependent) · Sleep efficiency percentage from the sleep tracker.</option>
         
-          <option value="sensor.nick_r_sleep_start_time">outcome · Reported sleep start time.</option>
+          <option value="sensor.nick_r_sleep_start_time">Outcome (Dependent) · Reported sleep start time.</option>
         
           <option value="binary_sensor.pantry_door_window">covariate · This is my pantry door that I get food out of. On means I opened it, Off means I closed it</option>
         
@@ -947,7 +936,7 @@
         <h2 data-onboarding-title></h2>
         <p data-onboarding-copy></p>
         <div class="onboarding-actions">
-          <button class="button small-button" type="button" data-onboarding-skip>Skip</button>
+          <button class="button small-button" type="button" data-onboarding-skip>Skip "Guide Me"</button>
           <button class="button small-button primary" type="button" data-onboarding-next>Next</button>
         </div>
       </section>

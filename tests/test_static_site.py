@@ -82,6 +82,12 @@ def test_static_causal_dag_snapshot_contains_analysis_result_payload():
 
     assert "staticAnalysisResultsDocument" in html
     assert 'data-analysis-results' in html
+    assert "PANAS Score" in html
+    assert "PANAS Score below 33" in html
+    assert "Daily PANAS summed score on a 10 to 50 scale" in html
+    assert "value=\"33\"" in html
+    assert "5.7" not in html
+    assert "Mood score" not in html
     assert "Sleep duration and low mood" in html
     assert "95% CI -0.63 to -0.18" in html
     assert "Predicted probability of low mood" in html
@@ -97,3 +103,20 @@ def test_static_causal_dag_snapshot_owns_static_analysis_submit_flow():
     assert "event.stopImmediatePropagation()" in html
     assert "Running analysis" in html
     assert "Saving DAG" not in html
+
+
+def test_static_causal_dag_snapshot_places_guide_button_before_title():
+    html = (ROOT / "causal-dag.html").read_text(encoding="utf-8")
+
+    guide_index = html.index('class="tab guide-tab brand-guide-tab"')
+    title_index = html.index("<strong>N of 1 Causal Analysis Engine</strong>")
+
+    assert guide_index < title_index
+    assert '<span class="brand-mark">CAE</span>' not in html
+    assert '<nav class="tabs" aria-label="Primary">' not in html
+    assert ">Analysis</a>" not in html
+    assert "Exposure (Independent)" in html
+    assert "Outcome (Dependent)" in html
+    assert "Independent Variable" not in html
+    assert "Dependent Variable" not in html
+    assert 'data-onboarding-skip>Skip "Guide Me"</button>' in html

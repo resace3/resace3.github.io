@@ -27,7 +27,7 @@
       <div class="panel-heading compact-heading">
       <div>
         <h2>Analysis setup</h2>
-        <p class="muted">Define the outcome, exposure, relevant history, and covariates.</p>
+        <p class="muted">Define the Outcome (Dependent), Exposure (Independent), relevant history, and covariates.</p>
       </div>
       </div>
       <form
@@ -42,7 +42,7 @@
         Causal inference method
         <select name="analysis_method" data-analysis-method>
           {% for value, method in analysis_methods.items() %}
-            <option value="{{ value }}" {% if config.analysis_method == value %}selected{% endif %}>{{ method.label }}</option>
+            <option value="{{ value }}" {% if config.analysis_method == value %}selected{% endif %}>{% if value == "g_formula" %}Default: {% endif %}{{ method.label }}</option>
           {% endfor %}
         </select>
         <span class="shadow-text">Methods available from the DAG: IPW, G-formula, and doubly robust estimation.</span>
@@ -71,7 +71,7 @@
       </datalist>
       <datalist id="all-sensor-options">
         {% for row in config.sensor_maps %}
-          <option value="{{ row.sensor }}">{{ row.role }} · {{ row.description }}</option>
+          <option value="{{ row.sensor }}">{% if row.role == "outcome" %}Outcome (Dependent){% elif row.role == "exposure" %}Exposure (Independent){% else %}{{ row.role }}{% endif %} · {{ row.description }}</option>
         {% endfor %}
       </datalist>
       {% for predictor in config.predictor_settings %}

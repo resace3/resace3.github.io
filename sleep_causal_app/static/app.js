@@ -40,7 +40,7 @@ function dagNodeTemplate(index) {
       <input type="hidden" name="node_y" value="${offset}" data-node-y>
       <strong class="dag-node-title" data-node-title>Variable ${index}</strong>
       <span class="dag-time-shadow" data-node-time-shadow>t-1</span>
-      <span class="dag-role-shadow" data-node-role-shadow>(covariate)</span>
+      <span class="dag-role-shadow" data-node-role-shadow>Covariate</span>
       <input type="hidden" name="node_label" value="Variable ${index}" data-node-label-input>
       <input type="hidden" name="node_description" data-node-description>
       <input type="hidden" name="node_id" value="${nodeId}" data-node-id-input>
@@ -430,8 +430,8 @@ function methodEquationExplanation(method, context) {
     ["H_t", "Relevant history before the outcome, including covariates and lagged variables from the DAG."],
   ];
   const commonInputs = [
-    ["Outcome from DAG", "The node marked as the outcome."],
-    ["Exposure from DAG", "The node marked as the exposure."],
+    ["Outcome (Dependent) from DAG", "The node marked as the outcome."],
+    ["Exposure (Independent) from DAG", "The node marked as the exposure."],
     ["History and covariates from DAG", "Nodes marked as covariates, plus relevant lagged history."],
   ];
   const commonAssumptions = [
@@ -463,7 +463,7 @@ function methodEquationExplanation(method, context) {
       inputs: commonInputs,
       assumptions: [
         ...commonAssumptions,
-        "Outcome model correctness: the model for the expected outcome is a reasonable description of the data.",
+        "Outcome (Dependent) model correctness: the model for the expected outcome is a reasonable description of the data.",
       ],
       technical: "The G-formula standardizes predicted outcomes over the observed history distribution: average the modeled outcome m(a,H_t) across the histories in your dataset.",
     },
@@ -478,7 +478,7 @@ function methodEquationExplanation(method, context) {
       inputs: commonInputs,
       assumptions: [
         ...commonAssumptions,
-        "Exposure model correctness: the model for exposure probability is a reasonable description of the data.",
+        "Exposure (Independent) model correctness: the model for exposure probability is a reasonable description of the data.",
         "No extreme weights: exposure probabilities should not be too close to 0 or 1 for many days.",
       ],
       technical: "IPW estimates the counterfactual mean by reweighting observed outcomes by the inverse of the estimated exposure probability conditional on history.",
@@ -575,19 +575,13 @@ function updateMethodEquation() {
   target.innerHTML = `
     <strong>${escapeHtml(info.title)}</strong>
     <span class="method-equation-summary">${escapeHtml(info.detail)}</span>
-    <div class="method-equation-box" data-equation-box>
-      <div class="method-equation-scroll" data-equation-scroll>
-        <div class="method-equation-scale" data-equation-scale aria-label="${escapeHtml(info.equation)}">\\[${info.latex}\\]</div>
-      </div>
-    </div>
     <button class="equation-explain-toggle" type="button" aria-expanded="false" data-equation-explain-toggle>
-      Explain equation
+      Explain method
     </button>
     <div class="equation-explanation" data-equation-explanation hidden>
       ${renderEquationExplanation(method, context)}
     </div>
   `;
-  typesetMath(target);
 }
 
 function hasDagNodeRole(role) {
@@ -637,7 +631,7 @@ function updateDagNodeTimeMarker(node, { applyDefaultLag = false } = {}) {
   const marker = node.querySelector("[data-node-time-shadow]");
   const roleMarker = node.querySelector("[data-node-role-shadow]");
   if (marker) marker.textContent = dagTimeLabelForRole(role);
-  if (roleMarker) roleMarker.textContent = role ? `(${role})` : "";
+  if (roleMarker) roleMarker.textContent = role ? roleLabel(role) : "";
   const lagInput = node.querySelector("[data-node-day-lag]");
   if (applyDefaultLag && lagInput && (role === "exposure" || role === "covariate") && Number(lagInput.value || 0) === 0) {
     lagInput.value = "1";
@@ -725,8 +719,8 @@ function setNodeFieldValue(node, fieldName, value) {
 }
 
 function roleLabel(role) {
-  if (role === "exposure") return "Exposure";
-  if (role === "outcome") return "Outcome";
+  if (role === "exposure") return "Exposure (Independent)";
+  if (role === "outcome") return "Outcome (Dependent)";
   if (role === "latent") return "Latent";
   return "Covariate";
 }
@@ -1106,7 +1100,7 @@ function renderHistogram(container, data) {
       <div class="histogram-x-axis" aria-hidden="true">
         ${xTicks.map((tick) => `<span>${formatNumber(tick)}<small>${formatHours(tick)}</small></span>`).join("")}
       </div>
-      <span class="axis-label x-label">Outcome value, minutes with hours</span>
+      <span class="axis-label x-label">Outcome (Dependent) value</span>
     </div>
   `;
 
@@ -1190,7 +1184,7 @@ function renderMiniHistogram(target, data) {
       <strong>${data.sensor}</strong>
       <span>${data.rows}/${data.requested_days} days · ${data.aggregation} · ${data.day_offset ? "day before" : "same day"}</span>
     </div>
-    ${data.outcome_label ? `<p class="mini-histogram-subtitle">Outcome rate by covariate level: ${data.outcome_label}</p>` : ""}
+    ${data.outcome_label ? `<p class="mini-histogram-subtitle">Outcome (Dependent) rate by covariate level: ${data.outcome_label}</p>` : ""}
     <div class="mini-association">${associationText}</div>
     <div class="mini-histogram-bars grouped-covariate-bars ${isBinary ? "binary-level-bars" : ""}">
       ${
@@ -1494,7 +1488,7 @@ document.addEventListener("click", (event) => {
     const panel = explainEquation.parentElement?.querySelector("[data-equation-explanation]");
     const expanded = explainEquation.getAttribute("aria-expanded") === "true";
     explainEquation.setAttribute("aria-expanded", String(!expanded));
-    explainEquation.textContent = expanded ? "Explain equation" : "Hide explanation";
+    explainEquation.textContent = expanded ? "Explain method" : "Hide explanation";
     if (panel) panel.hidden = expanded;
     return;
   }
@@ -2848,7 +2842,7 @@ const ONBOARDING_STEPS = [
   {
     selector: "[data-sidebar-panel='definition']",
     title: "Confirm the variable definition",
-    copy: "Use this panel to check the sensor mapping, role, daily aggregate, time window, and lag. Exposure and covariate nodes usually use prior-day timing.",
+    copy: "Use this panel to check the sensor mapping, role, daily aggregate, time window, and lag. Exposure (Independent) and covariate nodes usually use prior-day timing.",
     prepare: () => {
       prepareDagNodeGuide({ role: "exposure", text: "sleep" }, "definition");
     },
@@ -2895,26 +2889,26 @@ const ONBOARDING_STEPS = [
   },
   {
     selector: ".dag-node.outcome",
-    title: "Select the mood outcome",
-    copy: "Mood is the outcome the analysis tries to explain. Confirm the mapped mood sensor and make sure outcome timing is measured at t.",
+    title: "Select the PANAS outcome",
+    copy: "PANAS Score is the outcome the analysis tries to explain. Confirm the mapped PANAS sensor and make sure outcome timing is measured at t.",
     prepare: () => {
-      prepareDagNodeGuide({ role: "outcome", text: "mood" }, "definition");
+      prepareDagNodeGuide({ role: "outcome", text: "panas" }, "definition");
     },
   },
   {
     selector: "[data-sidebar-panel='preparation']",
-    title: "Set the mood threshold",
-    copy: "Mood starts as a low-mood outcome using less-than 5.7 on the 0 to 10 scale, which gives the demo data enough days on both sides.",
+    title: "Set the PANAS threshold",
+    copy: "PANAS Score starts as a lower-affect outcome using less-than 33 on the 10 to 50 PANAS summed scale, which gives the demo data enough days on both sides.",
     prepare: () => {
-      prepareDagNodeGuide({ role: "outcome", text: "mood" }, "preparation");
+      prepareDagNodeGuide({ role: "outcome", text: "panas" }, "preparation");
     },
   },
   {
     selector: "[data-sidebar-histogram]",
-    title: "Show the mood histogram",
-    copy: "The mood histogram shows the outcome distribution and where the low-mood threshold sits before the model runs.",
+    title: "Show the PANAS histogram",
+    copy: "The PANAS histogram shows the outcome distribution and where the lower-affect threshold sits before the model runs.",
     prepare: () => {
-      prepareDagNodeGuide({ role: "outcome", text: "mood" }, "advanced");
+      prepareDagNodeGuide({ role: "outcome", text: "panas" }, "advanced");
     },
   },
   {
@@ -2933,7 +2927,7 @@ const ONBOARDING_STEPS = [
   {
     selector: "[data-run-analysis-button]",
     title: "Run the analysis",
-    copy: "Click Run Analysis to use the current DAG, thresholds, timing, and selected method. The demo data will produce results for this mood example.",
+    copy: "Click Run Analysis to use the current DAG, thresholds, timing, and selected method. The demo data will produce results for this PANAS example.",
     prepare: () => {
       if (typeof setAnalysisToolsExpanded === "function") setAnalysisToolsExpanded(true);
     },

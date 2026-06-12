@@ -160,7 +160,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-width: max-content;
+  min-width: 0;
 }
 
 .brand-mark {
@@ -179,6 +179,10 @@ body {
 .brand strong,
 .brand span {
   display: block;
+}
+
+.brand-copy {
+  min-width: 0;
 }
 
 .brand strong {
@@ -232,9 +236,26 @@ body {
 }
 
 .guide-tab {
-  border: 0;
+  border: 1px solid rgba(37, 99, 235, 0.42);
   cursor: pointer;
   font: inherit;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.14), 0 12px 28px rgba(37, 99, 235, 0.26);
+  animation: guideTabBounce 2.8s ease-in-out infinite;
+}
+
+.brand-guide-tab {
+  flex: 0 0 auto;
+  padding: 0 15px;
+}
+
+.guide-tab:hover,
+.guide-tab:focus-visible {
+  border-color: rgba(29, 78, 216, 0.7);
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  color: #fff;
+  box-shadow: 0 0 0 7px rgba(37, 99, 235, 0.18), 0 14px 32px rgba(37, 99, 235, 0.32);
 }
 
 .onboarding-overlay[hidden] {
@@ -317,7 +338,28 @@ body {
 .onboarding-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 32px;
+}
+
+@keyframes guideTabBounce {
+  0%, 72%, 100% {
+    transform: translateY(0);
+  }
+  82% {
+    transform: translateY(-4px);
+  }
+  90% {
+    transform: translateY(0);
+  }
+  95% {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide-tab {
+    animation: none;
+  }
 }
 
 @keyframes onboardingPulse {
@@ -5151,6 +5193,25 @@ h1 {
 .tab.active,
 .tab:hover {
   color: var(--accent-strong);
+}
+
+.guide-tab,
+.guide-tab:hover,
+.guide-tab:focus-visible {
+  color: #fff;
+}
+
+.guide-tab {
+  border-color: rgba(37, 99, 235, 0.42);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.14), 0 12px 28px rgba(37, 99, 235, 0.26);
+}
+
+.guide-tab:hover,
+.guide-tab:focus-visible {
+  border-color: rgba(29, 78, 216, 0.7);
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  box-shadow: 0 0 0 7px rgba(37, 99, 235, 0.18), 0 14px 32px rgba(37, 99, 235, 0.32);
 }
 
 input,

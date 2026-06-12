@@ -23,7 +23,7 @@
       Role
       <select name="role">
         <option value="covariate" selected>Covariate</option>
-        <option value="outcome">Outcome</option>
+        <option value="outcome">Outcome (Dependent)</option>
       </select>
     </label>
     <label>
@@ -54,7 +54,7 @@
               </td>
               <td>
                 <select name="role">
-                  <option value="outcome" {% if row.role == "outcome" %}selected{% endif %}>Outcome</option>
+                  <option value="outcome" {% if row.role == "outcome" %}selected{% endif %}>Outcome (Dependent)</option>
                   <option value="covariate" {% if row.role == "covariate" %}selected{% endif %}>Covariate</option>
                 </select>
               </td>

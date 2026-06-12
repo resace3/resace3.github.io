@@ -19,7 +19,7 @@ DEFAULT_CONFIG = {
     "exposure_operator": "more_than",
     "exposure_threshold": 420,
     "outcome_operator": "less_than",
-    "outcome_threshold": 5.7,
+    "outcome_threshold": 33,
     "sleep_start_sensor": "sensor.nick_r_sleep_start_time",
     "exclude_before_sleep_start_hours": 0,
     "exclude_before_sleep_start_minutes": 0,
@@ -68,7 +68,7 @@ DEFAULT_CONFIG = {
             },
             {
                 "id": "sensor.nick_r_mood_score",
-                "label": "Mood score",
+                "label": "PANAS Score",
                 "role": "outcome",
                 "x": 520,
                 "y": 210,
@@ -76,7 +76,7 @@ DEFAULT_CONFIG = {
                 "day_lag": 0,
                 "value_type": "binary_threshold",
                 "threshold_operator": "less_than",
-                "threshold": 5.7,
+                "threshold": 33,
             },
         ],
         "edges": [
@@ -88,7 +88,7 @@ DEFAULT_CONFIG = {
     "sensor_maps": [
         {
             "sensor": "sensor.nick_r_mood_score",
-            "description": "Daily mood score on a 0 to 10 scale, where lower values indicate worse mood.",
+            "description": "Daily PANAS summed score on a 10 to 50 scale, where lower values indicate lower affect.",
             "role": "outcome",
         },
         {
@@ -608,7 +608,7 @@ def normalize_config(config):
         normalized.get("exposure_threshold"), 0
     )
     normalized["outcome_threshold"] = parse_float(
-        normalized.get("outcome_threshold"), 360
+        normalized.get("outcome_threshold"), 33
     )
     normalized["sleep_start_sensor"] = str(normalized.get("sleep_start_sensor", "")).strip()
     normalized["exclude_before_sleep_start_hours"] = max(
@@ -665,7 +665,7 @@ def apply_settings_form(config, form):
             "exposure_operator": form.get("exposure_operator", "more_than"),
             "exposure_threshold": parse_float(form.get("exposure_threshold"), 0),
             "outcome_operator": form.get("outcome_operator", "less_than"),
-            "outcome_threshold": parse_float(form.get("outcome_threshold"), 360),
+            "outcome_threshold": parse_float(form.get("outcome_threshold"), 33),
             "sleep_start_sensor": form.get("sleep_start_sensor", "").strip(),
             "exclude_before_sleep_start_hours": 0,
             "exclude_before_sleep_start_minutes": parse_int(
@@ -703,7 +703,7 @@ def apply_analysis_settings_from_dag(config):
             outcome.get("threshold_operator", "less_than")
         )
         threshold = outcome.get("threshold")
-        config["outcome_threshold"] = 5.7 if threshold is None else parse_float(threshold, 5.7)
+        config["outcome_threshold"] = 33 if threshold is None else parse_float(threshold, 33)
     else:
         config["sleep_sensor"] = ""
 
@@ -1363,8 +1363,8 @@ def build_saved_analysis_pdf(report):
             ("Analysis window", f"{metadata.get('analysis_window_days') or settings.get('analysis_window_days')} days"),
             ("Method", metadata.get("analysis_method_label")),
             ("State forgetting", report.get("model_settings", {}).get("state_forgetting")),
-            ("Outcome", metadata.get("outcome_label")),
-            ("Exposure", metadata.get("exposure_label")),
+            ("Outcome (Dependent)", metadata.get("outcome_label")),
+            ("Exposure (Independent)", metadata.get("exposure_label")),
             ("Rows", metadata.get("rows")),
             ("Date range", f"{metadata.get('date_start') or '-'} to {metadata.get('date_end') or '-'}"),
         ]
@@ -2234,7 +2234,7 @@ def build_predicted_outcome_curves_output(points):
             points,
             [
                 {"key": "no_exposure", "label": "No exposure", "class": "series-control"},
-                {"key": "exposure", "label": "Exposure", "class": "series-treatment"},
+                {"key": "exposure", "label": "Exposure (Independent)", "class": "series-treatment"},
             ],
         ),
     }
@@ -2264,7 +2264,7 @@ def build_counterfactual_summary_output(points, effect_model):
         exposure = np.asarray([point["exposure"] for point in points], dtype=float)
         rows = [
             {"component": "No exposure", "mean": round(float(np.mean(no_exposure)), 3), "detail": "Mean predicted outcome under A=0"},
-            {"component": "Exposure", "mean": round(float(np.mean(exposure)), 3), "detail": "Mean predicted outcome under A=1"},
+            {"component": "Exposure (Independent)", "mean": round(float(np.mean(exposure)), 3), "detail": "Mean predicted outcome under A=1"},
             {
                 "component": "Contrast",
                 "mean": round(float(np.mean(exposure - no_exposure)), 3),
@@ -2290,7 +2290,7 @@ def build_effect_distribution_output(effect_model):
         "kind": "histogram",
         "title": "Effect estimate distribution",
         "subtitle": "Distribution of recursive effect estimates over the analysis window.",
-        "x_label": "Outcome-unit effect",
+        "x_label": "Outcome (Dependent) unit effect",
         "bins": build_numeric_histogram_bins(effects),
     }
 
@@ -2696,10 +2696,10 @@ def build_demo_history(config):
         weekly = np.cos(index / 11.0)
         steps = 7600 + 1350 * seasonal + 520 * weekly + (index % 6) * 95
         sleep_minutes = 410 + 32 * np.sin((index - 2) / 6.0) + 18 * weekly + max(0, steps - 8200) / 95
-        mood = 5.8 + (sleep_minutes - 420) / 95 + (steps - 7600) / 4200 + 0.45 * np.sin((index + 3) / 4.0)
-        mood = max(1.0, min(9.5, mood))
+        panas_score = 35 + (sleep_minutes - 420) / 12 + (steps - 7600) / 650 + 3.2 * np.sin((index + 3) / 4.0)
+        panas_score = max(10, min(50, round(float(panas_score))))
         day_values = {
-            "sensor.nick_r_mood_score": round(float(mood), 2),
+            "sensor.nick_r_mood_score": panas_score,
             "sensor.nick_r_sleep_minutes_asleep": round(float(sleep_minutes), 1),
             "sensor.nick_r_steps": round(float(steps), 0),
         }

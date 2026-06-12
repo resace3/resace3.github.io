@@ -40,19 +40,23 @@ async function expandCausalAnalysis(page) {
 }
 
 async function startGuide(page) {
-  await page.waitForFunction(() => typeof window.startOnboarding === "function", null, { timeout: 10000 });
-  await page.evaluate(() => window.startOnboarding());
+  await expect(page.locator("[data-onboarding-start]")).toBeVisible({ timeout: 10000 });
+  await page.locator("[data-onboarding-start]").click();
   await expect(page.locator("[data-onboarding-overlay]")).toBeVisible({ timeout: 10000 });
+  await expect(page.locator("[data-onboarding-title]")).toBeVisible({ timeout: 10000 });
 }
 
 async function advanceGuideToTitle(page, titlePattern) {
-  const title = page.locator("[data-onboarding-title]");
-  const next = page.locator("[data-onboarding-next]");
-
   for (let step = 0; step < 20; step += 1) {
-    const currentTitle = await title.innerText({ timeout: 10000 });
+    const currentTitle = await page.evaluate(() => document.querySelector("[data-onboarding-title]")?.innerText || "");
     if (titlePattern.test(currentTitle)) return;
-    await next.evaluate((button) => button.click());
+    const clickedNext = await page.evaluate(() => {
+      const button = document.querySelector("[data-onboarding-next]");
+      if (!button) return false;
+      button.click();
+      return true;
+    });
+    expect(clickedNext).toBe(true);
     await page.waitForTimeout(220);
   }
 
@@ -137,6 +141,43 @@ test("causal DAG app is served through the personal site proxy", async ({ page }
   await expect(page.locator(".workflow-step-label", { hasText: "Step 1" })).toBeVisible();
   await expect(page.getByRole("button", { name: /Guide me/i })).toBeVisible();
   await expect(page.getByRole("button", { name: /Run analysis/i })).toBeVisible();
+  await expect(page.locator(".brand .guide-tab")).toHaveCount(1);
+  await expect(page.locator(".brand .brand-mark")).toHaveCount(0);
+  await expect(page.locator(".app-topbar .tabs")).toHaveCount(0);
+  await expect(page.locator(".tabs .guide-tab")).toHaveCount(0);
+  await expect(page.locator(".app-topbar").getByRole("link", { name: "Analysis" })).toHaveCount(0);
+  await expect(page.locator('[data-sidebar-field="node_role"] option[value="exposure"]')).toHaveText(
+    "Exposure (Independent)"
+  );
+  await expect(page.locator('[data-sidebar-field="node_role"] option[value="outcome"]')).toHaveText(
+    "Outcome (Dependent)"
+  );
+  await expect(page.locator(".dag-node.exposure [data-node-role-shadow]")).toContainText(
+    "Exposure (Independent)"
+  );
+  await expect(page.locator(".dag-node.exposure [data-node-role-shadow]")).not.toHaveText(/^\(/);
+  await expect(page.locator(".dag-node.outcome [data-node-role-shadow]")).toContainText(
+    "Outcome (Dependent)"
+  );
+  await expect(page.locator(".dag-node.outcome [data-node-role-shadow]")).not.toHaveText(/^\(/);
+  await expect(page.locator(".dag-node.outcome [data-node-title]")).toHaveText("PANAS Score");
+  await expect(page.locator(".dag-node.outcome [data-node-threshold]")).toHaveValue(/^33(?:\.0)?$/);
+  const guideBox = await page.locator(".brand .guide-tab").boundingBox();
+  const titleBox = await page.locator(".brand strong").boundingBox();
+  expect(guideBox.x + guideBox.width).toBeLessThanOrEqual(titleBox.x);
+  const guideStyle = await page.locator(".guide-tab").evaluate((button) => {
+    const style = window.getComputedStyle(button);
+    return {
+      animationName: style.animationName,
+      backgroundImage: style.backgroundImage,
+      boxShadow: style.boxShadow,
+      color: style.color,
+    };
+  });
+  expect(guideStyle.animationName).toContain("guideTabBounce");
+  expect(guideStyle.backgroundImage).toContain("linear-gradient");
+  expect(guideStyle.boxShadow).not.toBe("none");
+  expect(guideStyle.color).toBe("rgb(255, 255, 255)");
 });
 
 test("static causal DAG snapshot runs analysis without a backend", async ({ page }) => {
@@ -144,6 +185,13 @@ test("static causal DAG snapshot runs analysis without a backend", async ({ page
   await page.goto("/__static/causal-dag.html", { waitUntil: "domcontentloaded" });
   await dismissOnboarding(page);
   await expandCausalAnalysis(page);
+
+  await expect(page.locator("[data-analysis-method] option:checked")).toHaveText(
+    "Default: G-formula / outcome model"
+  );
+  await expect(page.locator("[data-equation-explain-toggle]")).toHaveText("Explain method");
+  await expect(page.locator("[data-method-equation]")).not.toContainText("\\[");
+  await expect(page.locator("[data-equation-box]")).toHaveCount(0);
 
   await page.evaluate(() => {
     const originalFetch = window.fetch.bind(window);
@@ -192,6 +240,11 @@ test("static causal DAG guide closes after guided analysis run", async ({ page }
   await advanceGuideToTitle(page, /Run the analysis/i);
 
   await expect(page.locator("[data-onboarding-count]")).toContainText("Guide 14 of 14");
+  await expect(page.locator("[data-onboarding-skip]")).toHaveText('Skip "Guide Me"');
+  const guideButtonGap = await page.locator(".onboarding-actions").evaluate((actions) =>
+    Number.parseFloat(window.getComputedStyle(actions).columnGap)
+  );
+  expect(guideButtonGap).toBeGreaterThanOrEqual(32);
   await page.evaluate(() => {
     window.__staticFetchCalls = [];
     const originalFetch = window.fetch.bind(window);

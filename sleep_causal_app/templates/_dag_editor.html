@@ -71,9 +71,9 @@
             <label>
               Role
               <select data-sidebar-field="node_role">
-                <option value="exposure">Exposure</option>
+                <option value="exposure">Exposure (Independent)</option>
                 <option value="covariate">Covariate</option>
-                <option value="outcome">Outcome</option>
+                <option value="outcome">Outcome (Dependent)</option>
                 <option value="latent">Latent</option>
               </select>
             </label>
@@ -159,7 +159,7 @@
             <span class="dag-time-shadow" data-node-time-shadow>
               {% if node.role in ["exposure", "covariate"] %}t-1{% elif node.role == "outcome" %}t{% endif %}
             </span>
-            <span class="dag-role-shadow" data-node-role-shadow>({{ node.role }})</span>
+            <span class="dag-role-shadow" data-node-role-shadow>{% if node.role == "exposure" %}Exposure (Independent){% elif node.role == "outcome" %}Outcome (Dependent){% elif node.role == "latent" %}Latent{% else %}Covariate{% endif %}</span>
             <input type="hidden" name="node_label" value="{{ node.label }}" data-node-label-input>
             <input type="hidden" name="node_description" value="{{ node.description or '' }}" data-node-description>
             <input type="hidden" name="node_id" value="{{ node.id }}" data-node-id-input>
@@ -191,7 +191,7 @@
 
   <datalist id="dag-sensor-options">
     {% for row in config.sensor_maps %}
-      <option value="{{ row.sensor }}">{{ row.role }} · {{ row.description }}</option>
+      <option value="{{ row.sensor }}">{% if row.role == "outcome" %}Outcome (Dependent){% elif row.role == "exposure" %}Exposure (Independent){% else %}{{ row.role }}{% endif %} · {{ row.description }}</option>
     {% endfor %}
   </datalist>
 

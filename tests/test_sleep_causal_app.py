@@ -35,6 +35,16 @@ def test_core_pages_render(client, path, expected_text):
     assert expected_text in response.data
 
 
+def test_default_dag_uses_panas_score_label(client):
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert b"PANAS Score" in response.data
+    assert b'value="33.0"' in response.data
+    assert b"10 to 50" in response.data
+    assert b"Mood score" not in response.data
+
+
 def test_demo_histogram_routes_return_json(client):
     outcome = client.get("/outcome-histogram")
     covariate = client.get(
@@ -48,7 +58,9 @@ def test_demo_histogram_routes_return_json(client):
 
     assert outcome.status_code == 200
     assert outcome.is_json
-    assert outcome.get_json()["ok"] is True
+    outcome_data = outcome.get_json()
+    assert outcome_data["ok"] is True
+    assert 10 <= outcome_data["minimum"] <= outcome_data["maximum"] <= 50
     assert covariate.status_code == 200
     assert covariate.is_json
     assert covariate.get_json()["ok"] is True
@@ -72,6 +84,7 @@ def test_analysis_setup_uses_run_analysis_button_label(client):
     assert response.status_code == 200
     assert b'data-run-analysis-button' in response.data
     assert b"Run Analysis" in response.data
+    assert b"Default: G-formula / outcome model" in response.data
 
 
 def test_autosave_routes_return_ok_json(client):

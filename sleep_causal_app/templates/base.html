@@ -38,21 +38,12 @@
     <header class="app-topbar">
       <div class="topbar-inner">
         <div class="brand">
-          <span class="brand-mark">CAE</span>
-          <div>
+          <button class="tab guide-tab brand-guide-tab" type="button" data-onboarding-start>Guide me</button>
+          <div class="brand-copy">
             <strong>N of 1 Causal Analysis Engine</strong>
             <span>N-of-1 causal model</span>
           </div>
         </div>
-        <nav class="tabs" aria-label="Primary">
-          <a
-            class="tab{% if active_tab == 'analysis' %} active{% endif %}"
-            href="/causal-dag.html"
-            {% if active_tab == 'analysis' %}aria-current="page"{% endif %}>
-            Analysis
-          </a>
-          <button class="tab guide-tab" type="button" data-onboarding-start>Guide me</button>
-        </nav>
       </div>
     </header>
     <main class="shell">
@@ -71,7 +62,7 @@
         <h2 data-onboarding-title></h2>
         <p data-onboarding-copy></p>
         <div class="onboarding-actions">
-          <button class="button small-button" type="button" data-onboarding-skip>Skip</button>
+          <button class="button small-button" type="button" data-onboarding-skip>Skip "Guide Me"</button>
           <button class="button small-button primary" type="button" data-onboarding-next>Next</button>
         </div>
       </section>
