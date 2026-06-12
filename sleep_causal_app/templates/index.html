@@ -42,10 +42,12 @@
         Causal inference method
         <select name="analysis_method" data-analysis-method>
           {% for value, method in analysis_methods.items() %}
-            <option value="{{ value }}" {% if config.analysis_method == value %}selected{% endif %}>{% if value == "g_formula" %}Default: {% endif %}{{ method.label }}</option>
+            {% if value != "dag_auto" %}
+              <option value="{{ value }}" {% if config.analysis_method == value or (config.analysis_method == "dag_auto" and value == "g_formula") %}selected{% endif %}>{% if value == "g_formula" %}Recommended: {% endif %}{{ method.label }}</option>
+            {% endif %}
           {% endfor %}
         </select>
-        <span class="shadow-text">Methods available from the DAG: IPW, G-formula, and doubly robust estimation.</span>
+        <span class="shadow-text">Already selected for this demo. Change only if you want a specific causal estimator.</span>
       </label>
       <div class="method-equation" data-method-equation aria-live="polite"></div>
 
@@ -66,7 +68,7 @@
           <option value="{{ row.sensor }}">Covariate · {{ row.description }}</option>
         {% endfor %}
         {% for row in config.sensor_maps if row.role == "outcome" %}
-          <option value="{{ row.sensor }}">Sleep sensor · previous-night predictor · {{ row.description }}</option>
+          <option value="{{ row.sensor }}">Simulated outcome · previous-day predictor · {{ row.description }}</option>
         {% endfor %}
       </datalist>
       <datalist id="all-sensor-options">
@@ -135,80 +137,115 @@
       {% else %}
         {% set method_outputs = result.method_outputs %}
         {% set primary_output = method_outputs.primary[0] if method_outputs.primary else none %}
-        <section class="panel result-card effect-estimate-card method-primary-result">
-          <div class="result-section-heading">
-            <div>
-              <p class="eyebrow">{{ result.analysis_method_label }}</p>
-              <h2>{{ primary_output.title if primary_output else "Treatment effect estimate" }}</h2>
-              <p class="muted">{{ primary_output.subtitle if primary_output else result.exposure_label ~ " on " ~ result.outcome_label }}</p>
+        {% set clinician_summary = result.clinician_summary or {} %}
+        <section class="panel result-card clinician-summary-card method-primary-result">
+          <p class="eyebrow">Clinician summary</p>
+          <h2>{{ clinician_summary.headline or "What this analysis found" }}</h2>
+          <p class="clinician-answer">{{ clinician_summary.answer or primary_output.interpretation }}</p>
+          <div class="clinician-summary-grid">
+            <article>
+              <span>Causal confidence</span>
+              <strong>{{ clinician_summary.confidence or "Unknown direction" }}</strong>
+            </article>
+            <article>
+              <span>Estimated change</span>
+              <strong>{{ clinician_summary.estimated_change or primary_output.estimate }}</strong>
+              {% if clinician_summary.confidence_interval %}
+                <small>95% CI {{ clinician_summary.confidence_interval }}</small>
+              {% endif %}
+            </article>
+            <article>
+              <span>Data reviewed</span>
+              <strong>{{ clinician_summary.days_reviewed or result.rows }} days</strong>
+              {% if clinician_summary.date_range %}
+                <small>{{ clinician_summary.date_range }}</small>
+              {% endif %}
+            </article>
+          </div>
+          {% if clinician_summary.cause_chain %}
+            <div class="clinician-cause-chain">
+              <strong>What the DAG says may cause what</strong>
+              <ul>
+                {% for statement in clinician_summary.cause_chain %}
+                  <li>{{ statement }}</li>
+                {% endfor %}
+              </ul>
             </div>
-          </div>
-          <div class="effect-estimate">
-            <strong>{{ primary_output.estimate if primary_output else result.latest_effect.contemporaneous }}</strong>
-            <span>95% CI {{ primary_output.lower if primary_output else result.latest_effect.lower }} to {{ primary_output.upper if primary_output else result.latest_effect.upper }}</span>
-            {% if primary_output and primary_output.date %}
-              <small>Latest estimate through {{ primary_output.date }}</small>
-            {% endif %}
-          </div>
-          {% if primary_output and primary_output.interpretation %}
-            <p class="effect-interpretation">{{ primary_output.interpretation }}</p>
+          {% endif %}
+          {% if clinician_summary.caveat %}
+            <p class="clinician-caveat">{{ clinician_summary.caveat }}</p>
           {% endif %}
         </section>
 
-        {% if result.result_validation_errors %}
-          <section class="panel result-card result-validation-card">
-            <p class="eyebrow">Output validation</p>
-            <h2>Some expected method outputs could not be generated</h2>
-            <div class="result-validation-list">
-              {% for error in result.result_validation_errors %}
-                <article>
-                  <strong>{{ error.label }}</strong>
-                  <p>{{ error.message }}</p>
-                </article>
-              {% endfor %}
-            </div>
-          </section>
-        {% endif %}
-
-        {% if method_outputs.main %}
-          <div class="method-results-section">
-            {% for output in method_outputs.main %}
-              {{ render_result_output(output) }}
-            {% endfor %}
-          </div>
-        {% endif %}
-
-        {% if method_outputs.diagnostics %}
-          <section class="method-results-group">
-            <div class="method-results-heading">
-              <div>
-                <p class="eyebrow">Diagnostics</p>
-                <h2>Method-specific diagnostics</h2>
+        <details class="technical-results-details">
+          <summary>
+            <span>
+              <strong>Show plots and technical details</strong>
+              <small>Estimator output, confidence intervals, plots, and diagnostics.</small>
+            </span>
+          </summary>
+          <div class="technical-results-content">
+            <section class="panel result-card effect-estimate-card method-primary-result">
+              <div class="result-section-heading">
+                <div>
+                  <p class="eyebrow">{{ result.analysis_method_label }}</p>
+                  <h2>{{ primary_output.title if primary_output else "Treatment effect estimate" }}</h2>
+                  <p class="muted">{{ primary_output.subtitle if primary_output else result.exposure_label ~ " on " ~ result.outcome_label }}</p>
+                </div>
               </div>
-            </div>
-            <div class="method-results-grid">
-              {% for output in method_outputs.diagnostics %}
-                {{ render_result_output(output) }}
-              {% endfor %}
-            </div>
-          </section>
-        {% endif %}
+              <div class="effect-estimate">
+                <strong>{{ primary_output.estimate if primary_output else result.latest_effect.contemporaneous }}</strong>
+                <span>95% CI {{ primary_output.lower if primary_output else result.latest_effect.lower }} to {{ primary_output.upper if primary_output else result.latest_effect.upper }}</span>
+                {% if primary_output and primary_output.date %}
+                  <small>Latest estimate through {{ primary_output.date }}</small>
+                {% endif %}
+              </div>
+              {% if primary_output and primary_output.interpretation %}
+                <p class="effect-interpretation">{{ primary_output.interpretation }}</p>
+              {% endif %}
+            </section>
 
-        {% if method_outputs.advanced %}
-          <details class="panel result-card advanced-results-card">
-            <summary>
-              <span>
-                <strong>Advanced results</strong>
-                <small>Effect distributions, sensitivity checks, and influence diagnostics when available.</small>
-              </span>
-            </summary>
-            <div class="method-results-grid advanced-results-grid">
-              {% for output in method_outputs.advanced %}
-                {{ render_result_output(output) }}
-              {% endfor %}
+            {% if result.result_validation_errors %}
+              <section class="panel result-card result-validation-card">
+                <p class="eyebrow">Output validation</p>
+                <h2>Some expected method outputs could not be generated</h2>
+                <div class="result-validation-list">
+                  {% for error in result.result_validation_errors %}
+                    <article>
+                      <strong>{{ error.label }}</strong>
+                      <p>{{ error.message }}</p>
+                    </article>
+                  {% endfor %}
+                </div>
+              </section>
+            {% endif %}
+
+            {% if method_outputs.main %}
+              <div class="method-results-section">
+                {% for output in method_outputs.main %}
+                  {{ render_result_output(output) }}
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            {% if method_outputs.diagnostics %}
+              <section class="method-results-group">
+                <div class="method-results-heading">
+                  <div>
+                    <p class="eyebrow">Diagnostics</p>
+                    <h2>Method-specific diagnostics</h2>
+                  </div>
+                </div>
+                <div class="method-results-grid">
+                  {% for output in method_outputs.diagnostics %}
+                    {{ render_result_output(output) }}
+                  {% endfor %}
+                </div>
+              </section>
+            {% endif %}
+
             </div>
-          </details>
-        {% endif %}
+        </details>
       {% endif %}
     {% else %}
       <section class="panel workbench-empty">

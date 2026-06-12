@@ -42,6 +42,48 @@
   </div>
 </section>
 
+{% if report.clinician_summary %}
+  {% set clinician_summary = report.clinician_summary %}
+  <section class="panel report-card clinician-summary-card method-primary-result">
+    <p class="eyebrow">Clinician summary</p>
+    <h2>{{ clinician_summary.headline }}</h2>
+    <p class="clinician-answer">{{ clinician_summary.answer }}</p>
+    <div class="clinician-summary-grid">
+      <article>
+        <span>Causal confidence</span>
+        <strong>{{ clinician_summary.confidence }}</strong>
+      </article>
+      <article>
+        <span>Estimated change</span>
+        <strong>{{ clinician_summary.estimated_change }}</strong>
+        {% if clinician_summary.confidence_interval %}
+          <small>95% CI {{ clinician_summary.confidence_interval }}</small>
+        {% endif %}
+      </article>
+      <article>
+        <span>Data reviewed</span>
+        <strong>{{ clinician_summary.days_reviewed }} days</strong>
+        {% if clinician_summary.date_range %}
+          <small>{{ clinician_summary.date_range }}</small>
+        {% endif %}
+      </article>
+    </div>
+    {% if clinician_summary.cause_chain %}
+      <div class="clinician-cause-chain">
+        <strong>What the DAG says may cause what</strong>
+        <ul>
+          {% for statement in clinician_summary.cause_chain %}
+            <li>{{ statement }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+    {% if clinician_summary.caveat %}
+      <p class="clinician-caveat">{{ clinician_summary.caveat }}</p>
+    {% endif %}
+  </section>
+{% endif %}
+
 <section class="panel report-card">
   <div class="result-section-heading">
     <div>
@@ -128,22 +170,6 @@
     </div>
     <div class="method-results-grid">
       {% for output in report.plots.diagnostics %}
-        {{ render_result_output(output) }}
-      {% endfor %}
-    </div>
-  </section>
-{% endif %}
-
-{% if report.plots.advanced %}
-  <section class="method-results-group report-card">
-    <div class="method-results-heading">
-      <div>
-        <p class="eyebrow">Advanced results</p>
-        <h2>Saved advanced outputs</h2>
-      </div>
-    </div>
-    <div class="method-results-grid">
-      {% for output in report.plots.advanced %}
         {{ render_result_output(output) }}
       {% endfor %}
     </div>

@@ -1,15 +1,41 @@
+import copy
 import json
 import os
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from html import escape as html_escape
 from pathlib import Path
-from urllib.parse import quote, urlencode
-
 import numpy as np
 import pandas as pd
-import requests
 from flask import Flask, Response, abort, flash, jsonify, redirect, render_template, request, url_for
+
+
+PRIOR_PANAS_ENTITY = "derived.nick_r_mood_score_lag1"
+PRIOR_PANAS_SOURCE_ENTITY = "sensor.nick_r_mood_score"
+
+
+SIMULATED_SENSOR_MAPS = [
+    {
+        "sensor": PRIOR_PANAS_ENTITY,
+        "description": "Prior-day PANAS Score derived from the simulated PANAS Score.",
+        "role": "covariate",
+    },
+    {
+        "sensor": "sensor.nick_r_mood_score",
+        "description": "Simulated daily PANAS summed score on a 10 to 50 scale, where lower values indicate lower affect.",
+        "role": "outcome",
+    },
+    {
+        "sensor": "sensor.nick_r_sleep_minutes_asleep",
+        "description": "Simulated total minutes asleep during the prior sleep period.",
+        "role": "covariate",
+    },
+    {
+        "sensor": "sensor.nick_r_steps",
+        "description": "Simulated daily step count.",
+        "role": "covariate",
+    },
+]
 
 
 DEFAULT_CONFIG = {
@@ -25,11 +51,17 @@ DEFAULT_CONFIG = {
     "exclude_before_sleep_start_minutes": 0,
     "predictor_entities": [
         "sensor.nick_r_steps",
+        PRIOR_PANAS_ENTITY,
     ],
     "predictor_settings": [
         {
             "entity": "sensor.nick_r_steps",
             "aggregation": "max",
+            "day_offset": 1,
+        },
+        {
+            "entity": PRIOR_PANAS_ENTITY,
+            "aggregation": "last",
             "day_offset": 1,
         },
     ],
@@ -43,11 +75,23 @@ DEFAULT_CONFIG = {
     "causal_dag": {
         "nodes": [
             {
-                "id": "sensor.nick_r_sleep_minutes_asleep",
-                "label": "Sleep duration",
-                "role": "exposure",
+                "id": PRIOR_PANAS_ENTITY,
+                "label": "PANAS Score (t-1)",
+                "role": "covariate",
                 "x": 80,
-                "y": 140,
+                "y": 220,
+                "aggregation": "last",
+                "day_lag": 1,
+                "value_type": "continuous",
+                "threshold_operator": "less_than",
+                "threshold": 33,
+            },
+            {
+                "id": "sensor.nick_r_sleep_minutes_asleep",
+                "label": "Sleep",
+                "role": "exposure",
+                "x": 350,
+                "y": 120,
                 "aggregation": "last",
                 "day_lag": 1,
                 "value_type": "binary_threshold",
@@ -58,8 +102,8 @@ DEFAULT_CONFIG = {
                 "id": "sensor.nick_r_steps",
                 "label": "Steps",
                 "role": "covariate",
-                "x": 80,
-                "y": 300,
+                "x": 350,
+                "y": 320,
                 "aggregation": "max",
                 "day_lag": 1,
                 "value_type": "binary_threshold",
@@ -70,8 +114,8 @@ DEFAULT_CONFIG = {
                 "id": "sensor.nick_r_mood_score",
                 "label": "PANAS Score",
                 "role": "outcome",
-                "x": 520,
-                "y": 210,
+                "x": 660,
+                "y": 220,
                 "aggregation": "last",
                 "day_lag": 0,
                 "value_type": "binary_threshold",
@@ -80,82 +124,13 @@ DEFAULT_CONFIG = {
             },
         ],
         "edges": [
-            {"source": "sensor.nick_r_sleep_minutes_asleep", "target": "sensor.nick_r_mood_score", "label": "effect"},
-            {"source": "sensor.nick_r_steps", "target": "sensor.nick_r_sleep_minutes_asleep", "label": "activity-sleep"},
-            {"source": "sensor.nick_r_steps", "target": "sensor.nick_r_mood_score", "label": "adjust"},
+            {"source": PRIOR_PANAS_ENTITY, "target": "sensor.nick_r_sleep_minutes_asleep", "label": "prior-mood-sleep"},
+            {"source": PRIOR_PANAS_ENTITY, "target": "sensor.nick_r_steps", "label": "prior-mood-activity"},
+            {"source": "sensor.nick_r_sleep_minutes_asleep", "target": "sensor.nick_r_mood_score", "label": "sleep-panas"},
+            {"source": "sensor.nick_r_steps", "target": "sensor.nick_r_mood_score", "label": "activity-panas"},
         ],
     },
-    "sensor_maps": [
-        {
-            "sensor": "sensor.nick_r_mood_score",
-            "description": "Daily PANAS summed score on a 10 to 50 scale, where lower values indicate lower affect.",
-            "role": "outcome",
-        },
-        {
-            "sensor": "sensor.nick_r_awakenings_count",
-            "description": "Number of recorded awakenings during a sleep session.",
-            "role": "outcome",
-        },
-        {
-            "sensor": "sensor.nick_r_sleep_minutes_awake",
-            "description": "Minutes recorded awake during the sleep window.",
-            "role": "outcome",
-        },
-        {
-            "sensor": "sensor.nick_r_sleep_time_in_bed",
-            "description": "Total minutes recorded in bed.",
-            "role": "outcome",
-        },
-        {
-            "sensor": "sensor.nick_r_sleep_minutes_asleep",
-            "description": "Total minutes asleep during the prior sleep period.",
-            "role": "covariate",
-        },
-        {
-            "sensor": "sensor.nick_r_sleep_minutes_to_fall_asleep",
-            "description": "Minutes recorded before falling asleep.",
-            "role": "outcome",
-        },
-        {
-            "sensor": "sensor.nick_r_sleep_efficiency",
-            "description": "Sleep efficiency percentage from the sleep tracker.",
-            "role": "outcome",
-        },
-        {
-            "sensor": "sensor.nick_r_sleep_start_time",
-            "description": "Reported sleep start time.",
-            "role": "outcome",
-        },
-        {
-            "sensor": "binary_sensor.pantry_door_window",
-            "description": (
-                "This is my pantry door that I get food out of. On means I opened it, "
-                "Off means I closed it"
-            ),
-            "role": "covariate",
-        },
-        {
-            "sensor": "sensor.nick_r_steps",
-            "description": "The number of steps I take a day. It is cumulative for each day.",
-            "role": "covariate",
-        },
-        {
-            "sensor": "sensor.nutribullet_plug_current",
-            "description": (
-                "the number of amps going through my nutribullet. A value over 1 means "
-                "I made a smoothie at that time"
-            ),
-            "role": "covariate",
-        },
-        {
-            "sensor": "binary_sensor.bthome_sensor_ee5c_window",
-            "description": (
-                "This is my refrigerator door that I get food out of in my room. On means "
-                "I opened it, Off means I closed it"
-            ),
-            "role": "covariate",
-        },
-    ],
+    "sensor_maps": SIMULATED_SENSOR_MAPS,
 }
 
 
@@ -196,6 +171,8 @@ def create_app():
     @app.get("/")
     def index():
         config = load_config(config_path)
+        restore_default_demo_dag(config)
+        save_config(config_path, config)
         preview = build_analysis_preview(config)
         return render_template(
             "index.html", active_tab="analysis", config=config, preview=preview
@@ -290,7 +267,6 @@ def create_app():
     def search_entities():
         query_text = request.args.get("q", "").strip()
         config = load_config(config_path)
-        entities = search_home_assistant_entities(query_text)
         mapped = [
             {
                 "entity_id": row["sensor"],
@@ -298,7 +274,7 @@ def create_app():
             }
             for row in config["sensor_maps"]
         ]
-        merged = {row["entity_id"]: row for row in mapped + entities}
+        merged = {row["entity_id"]: row for row in mapped}
         if query_text:
             needle = query_text.lower()
             merged = {
@@ -313,9 +289,9 @@ def create_app():
         config = load_config(config_path)
         sensor = request.args.get("sensor", "").strip()
         if not sensor:
-            return jsonify({"ok": False, "message": "Choose a sensor for this box.", "bins": []})
+            return jsonify({"ok": False, "message": "Choose a simulated variable for this box.", "bins": []})
         if "." not in sensor:
-            return jsonify({"ok": False, "message": "Histograms need a Home Assistant entity ID, such as sensor.example.", "bins": []})
+            return jsonify({"ok": False, "message": "Histograms need a simulated variable ID, such as sensor.nick_r_steps.", "bins": []})
         aggregation = normalize_aggregation(request.args.get("aggregation", "last"))
         time_start = request.args.get("time_start", "").strip()
         time_end = request.args.get("time_end", "").strip()
@@ -330,23 +306,23 @@ def create_app():
             "sleep_start_sensor": "",
             "analysis_window_days": days,
         }
-        try:
-            history = fetch_home_assistant_history(history_config)
-        except requests.RequestException:
-            return jsonify({"ok": False, "message": "Home Assistant rejected history lookup for this entity.", "bins": []})
+        history = fetch_home_assistant_history(history_config)
         if history.empty:
-            return jsonify({"ok": False, "message": "No Home Assistant history was returned for this sensor.", "bins": []})
-        sensor_history = history[history["entity_id"] == sensor].dropna(subset=["state"])
-        sensor_history = filter_history_time_window(sensor_history, time_start, time_end)
-        values = aggregate_daily_values(sensor_history, aggregation)
-        if day_lag:
-            values = values.shift(day_lag)
+            return jsonify({"ok": False, "message": "No simulated history was returned for this variable.", "bins": []})
+        values = daily_values_for_entity(
+            history,
+            sensor,
+            aggregation,
+            day_lag,
+            time_start,
+            time_end,
+        )
         if not values.empty:
             latest_day = values.index.max()
             start = latest_day - pd.Timedelta(days=days - 1)
             values = values[values.index >= start].dropna()
         if values.empty:
-            return jsonify({"ok": False, "message": "No usable values matched this sensor and time window.", "bins": []})
+            return jsonify({"ok": False, "message": "No usable values matched this simulated variable and time window.", "bins": []})
         return jsonify(
             build_series_histogram(
                 values,
@@ -426,7 +402,7 @@ def create_app():
             row for row in config["sensor_maps"] if row["sensor"] != sensor
         ]
         save_config(config_path, config)
-        flash("Sensor removed.")
+        flash("Simulated variable map reset.")
         return redirect(url_for("sensor_maps"))
 
     @app.post("/sensor-maps/save")
@@ -435,7 +411,7 @@ def create_app():
         sensors = request.form.getlist("sensor")
         descriptions = request.form.getlist("description")
         roles = request.form.getlist("role")
-        config["sensor_maps"] = [
+        submitted_maps = [
             {
                 "sensor": sensor.strip(),
                 "description": description.strip(),
@@ -443,8 +419,9 @@ def create_app():
             }
             for sensor, description, role in zip(sensors, descriptions, roles)
         ]
+        config["sensor_maps"] = normalize_user_sensor_maps(submitted_maps)
         save_config(config_path, config)
-        flash("Sensor maps saved.")
+        flash("Simulated variable maps saved.")
         return redirect(url_for("sensor_maps"))
 
     @app.post("/sensor-maps/add")
@@ -453,8 +430,12 @@ def create_app():
         sensor = request.form.get("sensor", "").strip()
         description = request.form.get("description", "").strip()
         role = normalize_sensor_role(request.form.get("role", "covariate"))
+        allowed = {row["sensor"] for row in SIMULATED_SENSOR_MAPS}
         if not sensor:
-            flash("Sensor entity is required.")
+            flash("Simulated variable ID is required.")
+            return redirect(url_for("sensor_maps"))
+        if sensor not in allowed:
+            flash("Only the built-in simulated variables can be used on this demo.")
             return redirect(url_for("sensor_maps"))
 
         config["sensor_maps"] = [
@@ -463,8 +444,9 @@ def create_app():
         config["sensor_maps"].append(
             {"sensor": sensor, "description": description, "role": role}
         )
+        config["sensor_maps"] = normalize_user_sensor_maps(config["sensor_maps"])
         save_config(config_path, config)
-        flash("Sensor added.")
+        flash("Simulated variable map saved.")
         return redirect(url_for("sensor_maps"))
 
     @app.post("/settings")
@@ -547,7 +529,7 @@ def create_app():
 
 
 def load_config(path):
-    config = {**DEFAULT_CONFIG}
+    config = copy.deepcopy(DEFAULT_CONFIG)
     if path.exists():
         with path.open("r", encoding="utf-8") as handle:
             config.update(json.load(handle))
@@ -578,7 +560,8 @@ def read_addon_options():
 
 
 def normalize_config(config):
-    normalized = {**DEFAULT_CONFIG, **config}
+    normalized = copy.deepcopy(DEFAULT_CONFIG)
+    normalized.update(config)
     normalized["predictor_entities"] = ensure_list(normalized.get("predictor_entities"))
     normalized["predictor_settings"] = normalize_predictor_settings(
         normalized.get("predictor_settings"), normalized["predictor_entities"], normalized.get("lag_days", 0)
@@ -632,6 +615,16 @@ def normalize_config(config):
     return normalized
 
 
+def default_demo_causal_dag():
+    return copy.deepcopy(DEFAULT_CONFIG["causal_dag"])
+
+
+def restore_default_demo_dag(config):
+    config["causal_dag"] = default_demo_causal_dag()
+    apply_analysis_settings_from_dag(config)
+    return config
+
+
 def ensure_list(value):
     if value is None:
         return []
@@ -642,6 +635,16 @@ def ensure_list(value):
 
 def split_entities(value):
     return [item.strip() for item in value.replace("\n", ",").split(",") if item.strip()]
+
+
+def source_entity_id(entity_id):
+    if entity_id == PRIOR_PANAS_ENTITY:
+        return PRIOR_PANAS_SOURCE_ENTITY
+    return entity_id
+
+
+def is_derived_entity(entity_id):
+    return source_entity_id(entity_id) != entity_id
 
 
 def form_entities(form, name):
@@ -954,22 +957,45 @@ def normalize_day_offset(value):
 
 
 def normalize_sensor_maps(value):
+    allowed = {row["sensor"]: copy.deepcopy(row) for row in SIMULATED_SENSOR_MAPS}
+    custom_by_sensor = {}
+    if isinstance(value, list):
+        for row in value:
+            if not isinstance(row, dict):
+                continue
+            sensor = str(row.get("sensor", "")).strip()
+            if sensor not in allowed:
+                continue
+            custom_by_sensor[sensor] = row
+
+    maps = []
+    for default_row in SIMULATED_SENSOR_MAPS:
+        sensor = default_row["sensor"]
+        row = custom_by_sensor.get(sensor, default_row)
+        description = str(row.get("description", "")).strip() or default_row["description"]
+        role = normalize_sensor_role(row.get("role", default_row["role"]))
+        maps.append({"sensor": sensor, "description": description, "role": role})
+    return maps
+
+
+def normalize_user_sensor_maps(value):
     if not isinstance(value, list):
-        return []
+        return copy.deepcopy(SIMULATED_SENSOR_MAPS)
 
     maps = []
     seen = set()
+    allowed = {row["sensor"] for row in SIMULATED_SENSOR_MAPS}
     for row in value:
         if not isinstance(row, dict):
             continue
         sensor = str(row.get("sensor", "")).strip()
         description = str(row.get("description", "")).strip()
         role = normalize_sensor_role(row.get("role", infer_sensor_role(sensor)))
-        if not sensor or sensor in seen:
+        if not sensor or sensor in seen or sensor not in allowed:
             continue
         seen.add(sensor)
         maps.append({"sensor": sensor, "description": description, "role": role})
-    return maps
+    return normalize_sensor_maps(maps)
 
 
 def normalize_sensor_role(value):
@@ -1110,6 +1136,7 @@ def build_saved_analysis_snapshot(config, result, created_at):
         "dag_svg": build_dag_svg(dag),
         "variable_settings": dag.get("nodes", []),
         "effect_estimates": result.get("latest_effect", {}),
+        "clinician_summary": result.get("clinician_summary", {}),
         "plots": result.get("method_outputs", {}),
         "diagnostics": {
             "validation_errors": result.get("result_validation_errors", []),
@@ -1155,6 +1182,7 @@ def analysis_report_snapshot(analysis):
         "dag_svg": build_dag_svg(dag),
         "variable_settings": dag.get("nodes", []),
         "effect_estimates": result.get("latest_effect", {}),
+        "clinician_summary": result.get("clinician_summary", {}),
         "plots": result.get("method_outputs", {}),
         "diagnostics": {
             "validation_errors": result.get("result_validation_errors", []),
@@ -1452,7 +1480,6 @@ def write_pdf_outputs(pdf, method_outputs):
     sections = [
         ("Main results", method_outputs.get("main", [])),
         ("Diagnostics", method_outputs.get("diagnostics", [])),
-        ("Advanced results", method_outputs.get("advanced", [])),
     ]
     wrote = False
     for section_label, outputs in sections:
@@ -1621,7 +1648,7 @@ def build_analysis_preview(config):
 
 def build_outcome_histogram(config):
     if not config["sleep_sensor"]:
-        return {"ok": False, "message": "Choose an outcome sensor.", "bins": []}
+        return {"ok": False, "message": "Choose an outcome variable.", "bins": []}
 
     history_config = {
         **config,
@@ -1633,7 +1660,7 @@ def build_outcome_histogram(config):
     if history.empty:
         return {
             "ok": False,
-            "message": "No numeric Home Assistant history was returned for this sensor.",
+            "message": "No numeric simulated history was returned for this variable.",
             "bins": [],
         }
 
@@ -1641,7 +1668,7 @@ def build_outcome_histogram(config):
     if values.empty:
         return {
             "ok": False,
-            "message": "No usable daily numeric values were found for this sensor.",
+            "message": "No usable daily numeric values were found for this simulated variable.",
             "bins": [],
         }
 
@@ -1654,7 +1681,7 @@ def build_outcome_histogram(config):
 
 def build_covariate_histogram(config, predictor):
     if not predictor["entity"]:
-        return {"ok": False, "message": "Choose a covariate sensor.", "bins": []}
+        return {"ok": False, "message": "Choose a covariate variable.", "bins": []}
 
     history_config = {
         **config,
@@ -1666,15 +1693,17 @@ def build_covariate_histogram(config, predictor):
     if history.empty:
         return {
             "ok": False,
-            "message": "No numeric Home Assistant history was returned for this covariate.",
+            "message": "No numeric simulated history was returned for this covariate.",
             "bins": [],
         }
 
     history = exclude_covariate_window(history, history_config)
-    entity_history = history[history["entity_id"] == predictor["entity"]].dropna(subset=["state"])
-    values = aggregate_daily_values(entity_history, predictor["aggregation"])
-    if predictor["day_offset"]:
-        values = values.shift(predictor["day_offset"])
+    values = daily_values_for_entity(
+        history,
+        predictor["entity"],
+        predictor["aggregation"],
+        predictor["day_offset"],
+    )
     if not values.empty:
         latest_day = values.index.max()
         start = latest_day - pd.Timedelta(days=config["analysis_window_days"] - 1)
@@ -1849,28 +1878,28 @@ def run_n_of_1_analysis(config):
 
 def run_dynamic_causal_analysis(config):
     if not config["sleep_sensor"]:
-        return {"ok": False, "message": "Choose an outcome sensor before running the causal analysis."}
+        return {"ok": False, "message": "Choose an outcome variable before running the causal analysis."}
     if not config.get("exposure_sensor"):
-        return {"ok": False, "message": "Choose a time-varying exposure sensor before running the causal analysis."}
+        return {"ok": False, "message": "Choose a time-varying exposure variable before running the causal analysis."}
 
     history = fetch_home_assistant_history(config)
     if history.empty:
         return {
             "ok": False,
-            "message": "No Home Assistant history was returned. Check entity IDs and long-term history.",
+            "message": "No simulated history was returned for this demo.",
         }
 
     dataset = prepare_causal_dataset(history, config)
     if dataset.empty or "outcome" not in dataset.columns:
         return {
             "ok": False,
-            "message": "No usable history was found for the selected sleep outcome sensor.",
+            "message": "No usable simulated history was found for the selected outcome variable.",
         }
 
     if "exposure" not in dataset.columns:
         return {
             "ok": False,
-            "message": "No usable history was found for the selected exposure sensor.",
+            "message": "No usable simulated history was found for the selected exposure variable.",
         }
 
     if len(dataset) < max(21, config["max_lag_days"] + 10):
@@ -1888,7 +1917,7 @@ def run_dynamic_causal_analysis(config):
                 "ok": False,
                 "message": (
                     "The exposure threshold creates only one exposure class. The recent "
-                    "history does not contain enough exposure variation for this sensor."
+                    "simulated history does not contain enough exposure variation for this variable."
                 ),
             }
 
@@ -1916,6 +1945,9 @@ def run_dynamic_causal_analysis(config):
         "effect_chart": build_effect_chart(effect_model["effects"], "effect"),
         "forest_plot": effect_model["forest_plot"],
         "method_outputs": method_outputs,
+        "clinician_summary": build_clinician_summary(
+            config, effect_model, dataset, resolved_method
+        ),
         "result_validation_errors": method_outputs["validation_errors"],
         "impulse_response": effect_model["impulse_response"],
         "step_response": effect_model["step_response"],
@@ -1924,7 +1956,7 @@ def run_dynamic_causal_analysis(config):
         "model_terms": effect_model["terms"],
         "prediction_note": (
             "This estimates paper-style dynamic N-of-1 causal contrasts from observational "
-            "Home Assistant time series. Interpretation still depends on the paper's key "
+            "simulated time series. Interpretation still depends on the paper's key "
             "assumptions: consistency, positivity, no unmeasured time-varying confounding, "
             "and a correctly specified relevant history."
         ),
@@ -1936,14 +1968,14 @@ METHOD_RESULT_SPECS = {
         "primary": ["effect_estimate"],
         "main": [],
         "diagnostics": ["love_plot", "weight_histogram", "effective_sample_size"],
-        "advanced": ["effect_distribution", "influence_diagnostics"],
+        "advanced": [],
         "expected": ["effect_estimate", "love_plot", "weight_histogram", "effective_sample_size"],
     },
     "g_formula": {
         "primary": ["effect_estimate"],
         "main": ["predicted_outcome_curves", "observed_predicted_plot", "counterfactual_summary"],
         "diagnostics": [],
-        "advanced": ["effect_distribution"],
+        "advanced": [],
         "expected": [
             "effect_estimate",
             "predicted_outcome_curves",
@@ -1955,7 +1987,7 @@ METHOD_RESULT_SPECS = {
         "primary": ["effect_estimate"],
         "main": ["predicted_outcome_curves"],
         "diagnostics": ["love_plot", "weight_histogram", "effective_sample_size"],
-        "advanced": ["effect_distribution", "influence_diagnostics"],
+        "advanced": [],
         "expected": [
             "effect_estimate",
             "love_plot",
@@ -1990,8 +2022,6 @@ def build_method_result_outputs(dataset, effect_model, config, method):
         "predicted_outcome_curves": build_predicted_outcome_curves_output(counterfactual),
         "observed_predicted_plot": build_observed_predicted_output(counterfactual),
         "counterfactual_summary": build_counterfactual_summary_output(counterfactual, effect_model),
-        "effect_distribution": build_effect_distribution_output(effect_model),
-        "influence_diagnostics": build_influence_diagnostics_output(dataset, propensity, counterfactual),
     }
     spec = METHOD_RESULT_SPECS[method]
     validation_errors = validate_method_outputs(method, spec["expected"], all_outputs)
@@ -2288,7 +2318,7 @@ def build_effect_distribution_output(effect_model):
     return {
         "id": "effect_distribution",
         "kind": "histogram",
-        "title": "Effect estimate distribution",
+        "title": "Effect history",
         "subtitle": "Distribution of recursive effect estimates over the analysis window.",
         "x_label": "Outcome (Dependent) unit effect",
         "bins": build_numeric_histogram_bins(effects),
@@ -2444,6 +2474,8 @@ def is_result_output_non_empty(output):
 
 
 def humanize_result_label(value):
+    if value == PRIOR_PANAS_ENTITY:
+        return "PANAS Score (t-1)"
     text = str(value or "").split(".")[-1]
     for prefix in ["nick_r_", "sensor_", "binary_sensor_"]:
         if text.startswith(prefix):
@@ -2625,61 +2657,7 @@ def build_outcome_label(config):
 
 
 def fetch_home_assistant_history(config):
-    if os.environ.get("PERSONAL_WEBSITE_USE_HOME_ASSISTANT") != "1":
-        return build_demo_history(config)
-
-    token = os.environ.get("SUPERVISOR_TOKEN")
-    if not token:
-        return build_demo_history(config)
-
-    entities = list(
-        dict.fromkeys(
-            [config["sleep_sensor"]]
-            + ([config["exposure_sensor"]] if config.get("exposure_sensor") else [])
-            + config["predictor_entities"]
-            + config["cross_validation_entities"]
-            + ([config["sleep_start_sensor"]] if config.get("sleep_start_sensor") else [])
-        )
-    )
-    end = datetime.now(timezone.utc)
-    start = end - timedelta(days=config["analysis_window_days"] + 7)
-    query = urlencode(
-        {
-            "end_time": end.isoformat(),
-            "filter_entity_id": ",".join(entities),
-            "minimal_response": "",
-            "no_attributes": "",
-            "significant_changes_only": "0",
-        }
-    )
-    url = (
-        "http://supervisor/core/api/history/period/"
-        f"{quote(start.isoformat())}?{query}"
-    )
-    response = requests.get(
-        url,
-        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
-        timeout=30,
-    )
-    response.raise_for_status()
-    series = []
-    for entity_history in response.json():
-        if not entity_history:
-            continue
-        entity_id = entity_history[0].get("entity_id")
-        for state in entity_history:
-            numeric_state = to_float(state.get("state"))
-            if numeric_state is None and entity_id != config.get("sleep_start_sensor"):
-                continue
-            series.append(
-                {
-                    "entity_id": entity_id,
-                    "last_changed": pd.to_datetime(state["last_changed"], utc=True),
-                    "raw_state": state.get("state"),
-                    "state": numeric_state,
-                }
-            )
-    return pd.DataFrame(series)
+    return build_demo_history(config)
 
 
 def build_demo_history(config):
@@ -2717,41 +2695,28 @@ def build_demo_history(config):
 
 
 def search_home_assistant_entities(query_text):
-    token = os.environ.get("SUPERVISOR_TOKEN")
-    if not token:
-        return []
-    try:
-        response = requests.get(
-            "http://supervisor/core/api/states",
-            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
-            timeout=15,
-        )
-        response.raise_for_status()
-    except requests.RequestException:
-        return []
-
-    needle = query_text.lower()
-    results = []
-    for row in response.json():
-        entity_id = str(row.get("entity_id", ""))
-        attributes = row.get("attributes") or {}
-        friendly_name = str(attributes.get("friendly_name", ""))
-        if needle and needle not in entity_id.lower() and needle not in friendly_name.lower():
-            continue
-        results.append({"entity_id": entity_id, "label": friendly_name})
-    return sorted(results, key=lambda item: item["entity_id"])[:60]
+    return []
 
 
 def daily_sensor_values(history, sensor, analysis_window_days):
     if history.empty:
         return pd.Series(dtype=float)
-    sensor_history = history[history["entity_id"] == sensor].copy()
-    daily = last_daily_values(sensor_history)
+    daily = daily_values_for_entity(history, sensor, "last")
     if daily.empty:
         return pd.Series(dtype=float)
     latest_day = daily.index.max()
     start = latest_day - pd.Timedelta(days=analysis_window_days - 1)
     return daily[daily.index >= start].dropna()
+
+
+def daily_values_for_entity(history, entity, aggregation="last", day_offset=0, time_start="", time_end=""):
+    source = source_entity_id(entity)
+    entity_history = history[history["entity_id"] == source].dropna(subset=["state"])
+    entity_history = filter_history_time_window(entity_history, time_start, time_end)
+    values = aggregate_daily_values(entity_history, aggregation)
+    if day_offset:
+        values = values.shift(day_offset)
+    return values
 
 
 def prepare_dataset(history, config):
@@ -2763,12 +2728,14 @@ def prepare_dataset(history, config):
 
     for setting in config["predictor_settings"]:
         entity = setting["entity"]
-        entity_history = history[history["entity_id"] == entity].dropna(subset=["state"])
-        if entity_history.empty:
+        series = daily_values_for_entity(
+            history,
+            entity,
+            setting["aggregation"],
+            setting["day_offset"],
+        )
+        if series.empty:
             continue
-        series = aggregate_daily_values(entity_history, setting["aggregation"])
-        if setting["day_offset"]:
-            series = series.shift(setting["day_offset"])
         series_by_entity[entity] = series
 
     if not series_by_entity:
@@ -2816,12 +2783,14 @@ def prepare_causal_dataset(history, config):
         entity = setting["entity"]
         if entity == config["exposure_sensor"]:
             continue
-        entity_history = history[history["entity_id"] == entity].dropna(subset=["state"])
-        if entity_history.empty:
+        series = daily_values_for_entity(
+            history,
+            entity,
+            setting["aggregation"],
+            setting["day_offset"],
+        )
+        if series.empty:
             continue
-        series = aggregate_daily_values(entity_history, setting["aggregation"])
-        if setting["day_offset"]:
-            series = series.shift(setting["day_offset"])
         series_by_name[entity] = series
 
     if not series_by_name:
@@ -2906,6 +2875,18 @@ def format_threshold_value(value):
     return f"{number:,.1f}"
 
 
+def format_signed_value(value):
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return ""
+    if abs(number) >= 100:
+        return f"{number:,.0f}"
+    if abs(number) >= 10:
+        return f"{number:,.1f}"
+    return f"{number:,.2f}"
+
+
 def dag_variable_label(config, sensor):
     for node in config.get("causal_dag", {}).get("nodes", []):
         if node.get("id") == sensor and node.get("label"):
@@ -2967,6 +2948,125 @@ def confidence_interval_phrase(lower, upper, unit):
     )
     direction = "higher" if direction_value > 0 else "lower"
     return f"{amounts[0]} to {amounts[1]} {unit} {direction}"
+
+
+def numeric_or_none(value):
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    if not np.isfinite(number):
+        return None
+    return number
+
+
+def sentence_join(items):
+    clean = [str(item) for item in items if str(item).strip()]
+    if not clean:
+        return ""
+    if len(clean) == 1:
+        return clean[0]
+    return ", ".join(clean[:-1]) + f" and {clean[-1]}"
+
+
+def clinician_covariate_phrase(config):
+    covariates = []
+    seen = set()
+    for entity in config.get("predictor_entities", []):
+        if entity in seen or entity in {config.get("sleep_sensor"), config.get("exposure_sensor")}:
+            continue
+        seen.add(entity)
+        covariates.append(dag_variable_label(config, entity))
+    if not covariates:
+        return ""
+    return f", after accounting for {sentence_join(covariates)}"
+
+
+def clinician_cause_chain(config):
+    dag = normalize_causal_dag(config.get("causal_dag"))
+    nodes = {node["id"]: node for node in dag.get("nodes", [])}
+
+    def statement_label(node):
+        if node.get("id") == PRIOR_PANAS_ENTITY:
+            return "Prior PANAS Score"
+        return str(node.get("label", "Variable"))
+
+    chain = []
+    seen = set()
+    for edge in dag.get("edges", []):
+        source = nodes.get(edge.get("source"))
+        target = nodes.get(edge.get("target"))
+        if not source or not target:
+            continue
+        if target.get("role") == "outcome":
+            statement = (
+                f"{statement_label(source)} may contribute to current "
+                f"{statement_label(target)} changes"
+            )
+        else:
+            statement = f"{statement_label(source)} may affect {statement_label(target)}"
+        if statement in seen:
+            continue
+        seen.add(statement)
+        chain.append(statement)
+    return chain
+
+
+def build_clinician_summary(config, effect_model, dataset, method):
+    latest = effect_model.get("latest_effect", {})
+    estimate = numeric_or_none(latest.get("contemporaneous"))
+    lower = numeric_or_none(latest.get("lower"))
+    upper = numeric_or_none(latest.get("upper"))
+    exposure = dag_variable_label(config, config.get("exposure_sensor"))
+    outcome = dag_variable_label(config, config.get("sleep_sensor"))
+    unit = outcome_unit_text(config)
+    estimate_phrase = signed_effect_phrase(estimate, unit)
+    exposed_state = exposure_state_text(config, "exposed")
+    reference_state = exposure_state_text(config, "reference")
+    covariate_phrase = clinician_covariate_phrase(config)
+
+    if estimate is None:
+        headline = f"{exposure} may affect {outcome}"
+        answer = "The analysis ran, but the estimated direction was not available."
+        direction = "Needs review"
+    else:
+        clear_direction = lower is not None and upper is not None and not (lower <= 0 <= upper)
+        direction = "More consistent signal" if clear_direction else "Suggestive, not definitive"
+        if clear_direction:
+            verb = "increase" if estimate > 0 else "decrease"
+            headline = f"{exposure} appears to {verb} current {outcome}"
+        else:
+            headline = f"{exposure} may contribute to current {outcome} changes"
+        answer = (
+            f"When {exposed_state}, {outcome} is estimated to be {estimate_phrase} "
+            f"than when {reference_state}{covariate_phrase}."
+        )
+
+    ci_text = ""
+    if lower is not None and upper is not None:
+        ci_text = f"{format_signed_value(lower)} to {format_signed_value(upper)}"
+
+    return {
+        "headline": headline,
+        "answer": answer,
+        "confidence": direction,
+        "estimated_change": estimate_phrase,
+        "confidence_interval": ci_text,
+        "days_reviewed": int(len(dataset)),
+        "date_range": (
+            f"{dataset.index.min().strftime('%Y-%m-%d')} through "
+            f"{dataset.index.max().strftime('%Y-%m-%d')}"
+            if len(dataset)
+            else ""
+        ),
+        "cause_chain": clinician_cause_chain(config),
+        "caveat": (
+            "This uses simulated observational data. Reverse causality or unmeasured "
+            "factors could still explain part of the pattern, so this is not proof "
+            "from a randomized trial."
+        ),
+        "method_label": analysis_method_label(method),
+    }
 
 
 def build_treatment_effect_interpretation(latest, config, method):

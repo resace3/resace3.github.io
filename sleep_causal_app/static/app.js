@@ -137,7 +137,7 @@ const DAG_NODE_FIELD_SELECTORS = {
   node_max_valid: "[data-node-max-valid]",
 };
 const ANALYSIS_PROGRESS_STEPS = [
-  "Fetching Home Assistant history.",
+  "Loading simulated history.",
   "Building daily exposure, outcome, and covariate variables.",
   "Estimating causal effects from the selected method.",
   "Checking positivity and observed exposure histories.",
@@ -266,7 +266,7 @@ async function refreshEntitySuggestions(query) {
     });
     validateSidebarSensor();
   } catch {
-    // Keep existing local sensor map options if Home Assistant lookup is unavailable.
+    // Keep existing simulated variable options if lookup is unavailable.
   }
 }
 
@@ -403,7 +403,7 @@ function methodEquation(method) {
       title: "G-formula / outcome model",
       equation: "E[Y_t(a)] = E{ m(a, H_t) }",
       latex: String.raw`\mathbb{E}\!\left[Y_t(a)\right] = \mathbb{E}_{H_t}\!\left[m(a, H_t)\right], \quad m(a,H_t)=\mathbb{E}\!\left(Y_t \mid A_t=a,H_t\right)`,
-      detail: "Model the outcome from exposure and relevant history, then contrast predicted outcomes under exposure versus no exposure.",
+      detail: "Recommended default: model the outcome from exposure and relevant history, then compare predicted outcomes under exposure versus no exposure.",
     },
     ipw: {
       title: "Inverse probability weighting",
@@ -1061,7 +1061,7 @@ function renderHistogram(container, data) {
   if (!data.ok || !data.bins.length) {
     bars.innerHTML = `<p class="empty-state">${data.message || "No histogram data available."}</p>`;
     stat.textContent = "No data";
-    readout.textContent = "Choose a numeric outcome sensor with history.";
+    readout.textContent = "Choose a numeric simulated outcome variable.";
     return;
   }
 
@@ -1114,7 +1114,7 @@ function renderHistogram(container, data) {
   readout.classList.toggle("coverage-warning", data.missing_days > 0);
   readout.textContent =
     data.missing_days > 0
-      ? `${data.missing_days} requested days are missing for this sensor. Range ${formatMinutesWithHours(data.minimum)} to ${formatMinutesWithHours(data.maximum)}.`
+      ? `${data.missing_days} requested days are missing for this simulated variable. Range ${formatMinutesWithHours(data.minimum)} to ${formatMinutesWithHours(data.maximum)}.`
       : `Full ${data.requested_days}-day coverage. Range ${formatMinutesWithHours(data.minimum)} to ${formatMinutesWithHours(data.maximum)}.`;
   updateThresholdHours();
   updateExposureCounts(data);
@@ -1399,7 +1399,7 @@ function renderIncomingHistogramOverlay(target, targetNode, series) {
         </span>
       `).join("")}
     </div>
-    <p class="dag-histogram-readout">Each line is scaled to that sensor's own daily distribution.</p>
+    <p class="dag-histogram-readout">Each line is scaled to that variable's own daily distribution.</p>
   `;
 }
 
@@ -2534,7 +2534,7 @@ document.addEventListener("submit", async (event) => {
     const previousContent = button?.innerHTML;
     if (button) {
       button.disabled = true;
-      button.innerHTML = '<span class="button-spinner" aria-hidden="true"></span> Saving DAG';
+      button.innerHTML = '<span class="button-spinner" aria-hidden="true"></span> Running analysis';
     }
     const saved = await autosaveDagNow(false);
     if (!saved) {
@@ -2822,7 +2822,11 @@ function submitAnalysisFromGuide() {
   if (!form) return;
   onboardingResumeAfterAnalysis = true;
   if (typeof setAnalysisToolsExpanded === "function") setAnalysisToolsExpanded(true);
+  if (window.personalWebsiteStaticDag && typeof window.runStaticAnalysisInPage === "function") {
+    return window.runStaticAnalysisInPage(form);
+  }
   form.requestSubmit();
+  return undefined;
 }
 
 const ONBOARDING_STEPS = [
@@ -2834,7 +2838,7 @@ const ONBOARDING_STEPS = [
   {
     selector: ".dag-node.exposure",
     title: "Select sleep exposure",
-    copy: "Sleep is the exposure in this time-varying example. Click it to inspect the sensor mapping, role, aggregation, and prior-day timing.",
+    copy: "Sleep is the exposure in this time-varying example. Click it to inspect the simulated variable, role, aggregation, and prior-day timing.",
     prepare: () => {
       prepareDagNodeGuide({ role: "exposure", text: "sleep" }, "definition");
     },
@@ -2842,7 +2846,7 @@ const ONBOARDING_STEPS = [
   {
     selector: "[data-sidebar-panel='definition']",
     title: "Confirm the variable definition",
-    copy: "Use this panel to check the sensor mapping, role, daily aggregate, time window, and lag. Exposure (Independent) and covariate nodes usually use prior-day timing.",
+    copy: "Use this panel to check the simulated variable, role, lag, and advanced aggregate or time-window settings. Exposure (Independent) and covariate nodes usually use prior-day timing.",
     prepare: () => {
       prepareDagNodeGuide({ role: "exposure", text: "sleep" }, "definition");
     },
@@ -2890,7 +2894,7 @@ const ONBOARDING_STEPS = [
   {
     selector: ".dag-node.outcome",
     title: "Select the PANAS outcome",
-    copy: "PANAS Score is the outcome the analysis tries to explain. Confirm the mapped PANAS sensor and make sure outcome timing is measured at t.",
+    copy: "PANAS Score is the outcome the analysis tries to explain. Confirm the simulated PANAS variable and make sure outcome timing is measured at t.",
     prepare: () => {
       prepareDagNodeGuide({ role: "outcome", text: "panas" }, "definition");
     },
@@ -3093,6 +3097,18 @@ function startOnboarding() {
   renderOnboardingStep();
 }
 
+function showOnboardingStepForTest(title) {
+  const stepIndex = ONBOARDING_STEPS.findIndex((step) => step.title === title);
+  const overlay = document.querySelector("[data-onboarding-overlay]");
+  if (stepIndex < 0 || !overlay) return false;
+  onboardingIndex = stepIndex;
+  onboardingActive = true;
+  overlay.hidden = false;
+  document.body.classList.add("is-onboarding-active");
+  renderOnboardingStep();
+  return true;
+}
+
 function finishOnboarding() {
   const overlay = document.querySelector("[data-onboarding-overlay]");
   onboardingActive = false;
@@ -3110,10 +3126,15 @@ function initializeOnboarding() {
   if (!start || !next) return;
 
   start.addEventListener("click", startOnboarding);
-  next.addEventListener("click", () => {
+  next.addEventListener("click", async () => {
     const step = ONBOARDING_STEPS[onboardingIndex];
     if (step?.action) {
-      step.action();
+      next.disabled = true;
+      try {
+        await step.action();
+      } finally {
+        next.disabled = false;
+      }
       return;
     }
     if (onboardingIndex >= ONBOARDING_STEPS.length - 1) {
@@ -3131,6 +3152,8 @@ function initializeOnboarding() {
     window.setTimeout(startOnboarding, 750);
   }
 }
+
+window.__showOnboardingStepForTest = showOnboardingStepForTest;
 
 document.addEventListener("DOMContentLoaded", loadHistogram);
 document.addEventListener("DOMContentLoaded", updateThresholdHours);

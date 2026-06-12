@@ -24,6 +24,23 @@
       (() => {
         const originalFetch = window.fetch.bind(window);
         const histogramDefaults = {
+          "derived.nick_r_mood_score_lag1": {
+            minimum: 28,
+            maximum: 41,
+            mean: 34.1,
+            median: 34,
+            std_dev: 3.0,
+            aggregation: "last",
+            day_lag: 1,
+            bins: [
+              [28, 30, 8],
+              [31, 33, 25],
+              [34, 36, 33],
+              [37, 39, 21],
+              [40, 41, 3]
+            ],
+            values: [33, 34, 35, 37, 36, 34, 32, 31, 35, 38, 39, 36, 34, 33]
+          },
           "sensor.nick_r_sleep_minutes_asleep": {
             minimum: 335,
             maximum: 502,
@@ -111,29 +128,69 @@
 <html lang="en">
   <body>
     <main id="analysis-results" class="workbench-output analysis-results" data-analysis-results>
-      <section class="panel result-card effect-estimate-card method-primary-result">
-        <div class="result-section-heading">
-          <div>
-            <p class="eyebrow">G-formula / outcome model</p>
-            <h2>Sleep duration and low mood</h2>
-            <p class="muted">Static demo result using the mood, sleep, and steps DAG.</p>
-          </div>
+      <section class="panel result-card clinician-summary-card method-primary-result">
+        <p class="eyebrow">Clinician summary</p>
+        <h2>Sleep may contribute to current PANAS Score changes</h2>
+        <p class="clinician-answer">When Sleep is above 420 minutes, current PANAS Score is estimated to be about 0.73 outcome units higher than when Sleep is at or below 420 minutes, after accounting for Steps and prior PANAS Score.</p>
+        <div class="clinician-summary-grid">
+          <article>
+            <span>Causal confidence</span>
+            <strong>Suggestive, not definitive</strong>
+          </article>
+          <article>
+            <span>Estimated change</span>
+            <strong>about 0.73 outcome units higher</strong>
+            <small>95% CI -0.54 to 1.99</small>
+          </article>
+          <article>
+            <span>Data reviewed</span>
+            <strong>90 days</strong>
+            <small>Synthetic example</small>
+          </article>
         </div>
-        <div class="effect-estimate">
-          <strong>-0.42</strong>
-          <span>95% CI -0.63 to -0.18</span>
-          <small>Synthetic 90-day example with sleep as the exposure</small>
+        <div class="clinician-cause-chain">
+          <strong>What the DAG says may cause what</strong>
+          <ul>
+            <li>Prior PANAS Score may affect Sleep</li>
+            <li>Prior PANAS Score may affect Steps</li>
+            <li>Sleep may contribute to current PANAS Score changes</li>
+            <li>Steps may contribute to current PANAS Score changes</li>
+          </ul>
         </div>
-        <p class="effect-interpretation">In this demo, nights above the sleep threshold are followed by fewer low-mood days after adjusting for prior-day steps.</p>
+        <p class="clinician-caveat">This uses simulated observational data. Reverse causality or unmeasured factors could still explain part of the pattern, so this is not proof from a randomized trial.</p>
       </section>
 
-      <div class="method-results-section">
-        <section class="panel result-card method-result-card method-result-ess_summary">
+      <details class="technical-results-details">
+        <summary>
+          <span>
+            <strong>Show plots and technical details</strong>
+            <small>Estimator output, confidence intervals, plots, and diagnostics.</small>
+          </span>
+        </summary>
+        <div class="technical-results-content">
+          <section class="panel result-card effect-estimate-card method-primary-result">
+            <div class="result-section-heading">
+              <div>
+                <p class="eyebrow">G-formula / outcome model</p>
+                <h2>Treatment effect estimate</h2>
+                <p class="muted">Static demo result using the mood, sleep, and steps DAG.</p>
+              </div>
+            </div>
+            <div class="effect-estimate">
+              <strong>0.73</strong>
+              <span>95% CI -0.54 to 1.99</span>
+              <small>Synthetic 90-day example with sleep as the exposure</small>
+            </div>
+            <p class="effect-interpretation">In this demo, nights above the sleep threshold are followed by higher current PANAS Score after adjusting for prior-day steps and prior PANAS Score.</p>
+          </section>
+
+          <div class="method-results-section">
+            <section class="panel result-card method-result-card method-result-ess_summary">
           <div class="method-card-heading">
             <div>
               <p class="eyebrow">setup summary</p>
               <h2>Model inputs</h2>
-              <p class="muted">Outcome (Dependent): PANAS Score below 33. Exposure (Independent): sleep duration above 7 hours. Covariate: prior-day steps.</p>
+              <p class="muted">Outcome (Dependent): current PANAS Score below 33. Exposure (Independent): sleep duration above 7 hours. Covariates: prior-day steps and prior PANAS Score.</p>
             </div>
           </div>
           <div class="ess-grid">
@@ -160,11 +217,11 @@
           <div class="method-card-heading">
             <div>
               <p class="eyebrow">prediction over time</p>
-              <h2>Predicted probability of low mood</h2>
-              <p class="muted">Counterfactual prediction under higher sleep compared with shorter sleep.</p>
+              <h2>Predicted PANAS Score</h2>
+              <p class="muted">Counterfactual PANAS Score prediction under higher sleep compared with shorter sleep.</p>
             </div>
           </div>
-          <div class="method-line-chart" aria-label="Predicted probability of low mood">
+          <div class="method-line-chart" aria-label="Predicted PANAS Score">
             <div class="prediction-y-axis" aria-hidden="true">
               <span style="top: 6%">0.70</span>
               <span style="top: 36%">0.45</span>
@@ -172,7 +229,7 @@
               <span style="top: 92%">0.00</span>
             </div>
             <div class="method-chart-plot">
-              <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" role="img" aria-label="Static predicted low mood chart">
+              <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" role="img" aria-label="Static predicted PANAS Score chart">
                 <line class="prediction-gridline" x1="0" x2="1000" y1="80" y2="80"></line>
                 <line class="prediction-gridline" x1="0" x2="1000" y1="380" y2="380"></line>
                 <line class="prediction-gridline" x1="0" x2="1000" y1="680" y2="680"></line>
@@ -197,7 +254,7 @@
           <div class="method-card-heading">
             <div>
               <p class="eyebrow">counterfactual comparison</p>
-              <h2>Estimated mood difference</h2>
+              <h2>Estimated PANAS Score difference</h2>
               <p class="muted">Static preview values for the personal website demo.</p>
             </div>
           </div>
@@ -205,25 +262,27 @@
             <thead>
               <tr>
                 <th>Scenario</th>
-                <th>Mean low-mood risk</th>
+                <th>Mean PANAS Score</th>
                 <th>Interpretation</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td>Observed sleep pattern</td>
-                <td>0.48</td>
-                <td>Uses the synthetic sleep and steps history.</td>
+                <td>34.18</td>
+                <td>Uses the synthetic sleep, steps, and prior PANAS history.</td>
               </tr>
               <tr>
                 <td>Sleep over 7 hours</td>
-                <td>0.31</td>
-                <td>Lower predicted low-mood risk in this demo.</td>
+                <td>34.91</td>
+                <td>Higher predicted PANAS Score in this demo.</td>
               </tr>
             </tbody>
           </table>
-        </section>
-      </div>
+            </section>
+          </div>
+        </div>
+      </details>
     </main>
   </body>
 </html>`;
@@ -326,6 +385,8 @@
             }
           }
         }
+
+        window.runStaticAnalysisInPage = runStaticAnalysisInPage;
 
         function handleStaticAnalysisEvent(event) {
           let form = null;
@@ -438,7 +499,7 @@
     </header>
     <main class="shell">
       
-        
+
       
       
 
@@ -514,9 +575,8 @@
               <input autocomplete="off" data-sidebar-field="node_label">
             </label>
             <label>
-              Sensor mapping
+              Simulated variable
               <input list="dag-sensor-options" autocomplete="off" data-sidebar-field="node_id" data-entity-search-input>
-              <span class="field-error" data-sidebar-sensor-error hidden>Sensor not found.</span>
             </label>
             <label>
               Role
@@ -528,29 +588,32 @@
               </select>
             </label>
             <label>
-              Daily aggregate
-              <select data-sidebar-field="node_aggregation">
-                <option value="last">Last</option>
-                <option value="sum">Sum / count</option>
-                <option value="mean">Mean</option>
-                <option value="min">Min</option>
-                <option value="max">Max</option>
-              </select>
-            </label>
-            <div class="dag-time-grid">
-              <label>
-                From time
-                <input type="time" data-sidebar-field="node_time_start">
-              </label>
-              <label>
-                To time
-                <input type="time" data-sidebar-field="node_time_end">
-              </label>
-            </div>
-            <label>
               Lag days
               <input type="number" min="0" max="21" data-sidebar-field="node_day_lag">
             </label>
+            <details class="sidebar-advanced-settings">
+              <summary>Advanced</summary>
+              <label>
+                Daily aggregate
+                <select data-sidebar-field="node_aggregation">
+                  <option value="last">Last</option>
+                  <option value="sum">Sum / count</option>
+                  <option value="mean">Mean</option>
+                  <option value="min">Min</option>
+                  <option value="max">Max</option>
+                </select>
+              </label>
+              <div class="dag-time-grid">
+                <label>
+                  From time
+                  <input type="time" data-sidebar-field="node_time_start">
+                </label>
+                <label>
+                  To time
+                  <input type="time" data-sidebar-field="node_time_end">
+                </label>
+              </div>
+            </details>
             <button class="button small-button" type="button" data-sidebar-next="preparation">Next: data preparation</button>
           </div>
           <div class="sidebar-section sidebar-tab-panel" data-sidebar-panel="preparation" hidden>
@@ -597,20 +660,54 @@
             </defs>
           </svg>
 
+
+          <article
+            class="dag-node covariate"
+            style="left: 80.0px; top: 220.0px"
+            data-dag-node
+            data-node-id="derived.nick_r_mood_score_lag1">
+            <input type="hidden" name="node_x" value="80.0" data-node-x>
+            <input type="hidden" name="node_y" value="220.0" data-node-y>
+            <strong class="dag-node-title" data-node-title>PANAS Score (t-1)</strong>
+            <span class="dag-time-shadow" data-node-time-shadow>
+              t-1
+            </span>
+            <span class="dag-role-shadow" data-node-role-shadow>Covariate</span>
+            <input type="hidden" name="node_label" value="PANAS Score (t-1)" data-node-label-input>
+            <input type="hidden" name="node_description" value="" data-node-description>
+            <input type="hidden" name="node_id" value="derived.nick_r_mood_score_lag1" data-node-id-input>
+            <input type="hidden" name="node_role" value="covariate" data-node-role>
+            <input type="hidden" name="node_missing_strategy" value="drop" data-node-missing-strategy>
+            <input type="hidden" name="node_min_valid" value="" data-node-min-valid>
+            <input type="hidden" name="node_max_valid" value="" data-node-max-valid>
+            <input type="hidden" name="node_time_start" value="" data-node-time-start>
+            <input type="hidden" name="node_time_end" value="" data-node-time-end>
+            <input type="hidden" name="node_rolling_days" value="1" data-node-rolling-days>
+            <input type="hidden" name="node_aggregation" value="last" data-node-aggregation>
+            <input type="hidden" name="node_day_lag" value="1" data-node-day-lag>
+            <input type="hidden" name="node_value_type" value="continuous" data-node-value-type>
+            <input type="hidden" name="node_threshold_operator" value="less_than" data-node-threshold-operator>
+            <input type="hidden" name="node_threshold" value="33" data-node-threshold>
+            <div class="dag-node-histogram" data-dag-node-histogram hidden></div>
+            <button class="dag-connect-handle top" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="top"></button>
+            <button class="dag-connect-handle right" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="right"></button>
+            <button class="dag-connect-handle bottom" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="bottom"></button>
+            <button class="dag-connect-handle left" type="button" title="Drag to another box to create an arrow" aria-label="Create arrow from this box" data-dag-connect-handle data-port="left"></button>
+          </article>
         
           <article
             class="dag-node exposure"
-            style="left: 138.0px; top: 140.0px"
+            style="left: 350.0px; top: 120.0px"
             data-dag-node
             data-node-id="sensor.nick_r_sleep_minutes_asleep">
-            <input type="hidden" name="node_x" value="138.0" data-node-x>
-            <input type="hidden" name="node_y" value="140.0" data-node-y>
-            <strong class="dag-node-title" data-node-title>Sleep duration</strong>
+            <input type="hidden" name="node_x" value="350.0" data-node-x>
+            <input type="hidden" name="node_y" value="120.0" data-node-y>
+            <strong class="dag-node-title" data-node-title>Sleep</strong>
             <span class="dag-time-shadow" data-node-time-shadow>
               t-1
             </span>
             <span class="dag-role-shadow" data-node-role-shadow>Exposure (Independent)</span>
-            <input type="hidden" name="node_label" value="Sleep duration" data-node-label-input>
+            <input type="hidden" name="node_label" value="Sleep" data-node-label-input>
             <input type="hidden" name="node_description" value="" data-node-description>
             <input type="hidden" name="node_id" value="sensor.nick_r_sleep_minutes_asleep" data-node-id-input>
             <input type="hidden" name="node_role" value="exposure" data-node-role>
@@ -634,11 +731,11 @@
         
           <article
             class="dag-node covariate"
-            style="left: 138.0px; top: 300.0px"
+            style="left: 350.0px; top: 320.0px"
             data-dag-node
             data-node-id="sensor.nick_r_steps">
-            <input type="hidden" name="node_x" value="138.0" data-node-x>
-            <input type="hidden" name="node_y" value="300.0" data-node-y>
+            <input type="hidden" name="node_x" value="350.0" data-node-x>
+            <input type="hidden" name="node_y" value="320.0" data-node-y>
             <strong class="dag-node-title" data-node-title>Steps</strong>
             <span class="dag-time-shadow" data-node-time-shadow>
               t-1
@@ -668,11 +765,11 @@
         
           <article
             class="dag-node outcome"
-            style="left: 578.0px; top: 210.0px"
+            style="left: 660.0px; top: 220.0px"
             data-dag-node
             data-node-id="sensor.nick_r_mood_score">
-            <input type="hidden" name="node_x" value="578.0" data-node-x>
-            <input type="hidden" name="node_y" value="210.0" data-node-y>
+            <input type="hidden" name="node_x" value="660.0" data-node-x>
+            <input type="hidden" name="node_y" value="220.0" data-node-y>
             <strong class="dag-node-title" data-node-title>PANAS Score</strong>
             <span class="dag-time-shadow" data-node-time-shadow>
               t
@@ -708,51 +805,41 @@
   </section>
 
   <datalist id="dag-sensor-options">
-    
-      <option value="sensor.nick_r_mood_score">Outcome (Dependent) · Daily PANAS summed score on a 10 to 50 scale, where lower values indicate lower affect.</option>
-    
-      <option value="sensor.nick_r_awakenings_count">Outcome (Dependent) · Number of recorded awakenings during a sleep session.</option>
-    
-      <option value="sensor.nick_r_sleep_minutes_awake">Outcome (Dependent) · Minutes recorded awake during the sleep window.</option>
-    
-      <option value="sensor.nick_r_sleep_time_in_bed">Outcome (Dependent) · Total minutes recorded in bed.</option>
-    
-      <option value="sensor.nick_r_sleep_minutes_asleep">covariate · Total minutes asleep during the prior sleep period.</option>
-    
-      <option value="sensor.nick_r_sleep_minutes_to_fall_asleep">Outcome (Dependent) · Minutes recorded before falling asleep.</option>
-    
-      <option value="sensor.nick_r_sleep_efficiency">Outcome (Dependent) · Sleep efficiency percentage from the sleep tracker.</option>
-    
-      <option value="sensor.nick_r_sleep_start_time">Outcome (Dependent) · Reported sleep start time.</option>
-    
-      <option value="binary_sensor.pantry_door_window">covariate · This is my pantry door that I get food out of. On means I opened it, Off means I closed it</option>
-    
-      <option value="sensor.nick_r_steps">covariate · The number of steps I take a day. It is cumulative for each day.</option>
-    
-      <option value="sensor.nutribullet_plug_current">covariate · the number of amps going through my nutribullet. A value over 1 means I made a smoothie at that time</option>
-    
-      <option value="binary_sensor.bthome_sensor_ee5c_window">covariate · This is my refrigerator door that I get food out of in my room. On means I opened it, Off means I closed it</option>
+
+      <option value="derived.nick_r_mood_score_lag1">covariate · Prior-day PANAS Score derived from the simulated PANAS Score.</option>
+
+      <option value="sensor.nick_r_mood_score">Outcome (Dependent) · Simulated daily PANAS summed score on a 10 to 50 scale, where lower values indicate lower affect.</option>
+
+      <option value="sensor.nick_r_sleep_minutes_asleep">covariate · Simulated total minutes asleep during the prior sleep period.</option>
+
+      <option value="sensor.nick_r_steps">covariate · Simulated daily step count.</option>
     
   </datalist>
 
   <div class="dag-edge-store" data-dag-edge-list hidden>
     
       <div class="dag-edge-row" data-dag-edge-row>
+        <input name="edge_source" value="derived.nick_r_mood_score_lag1" data-edge-source>
+        <input name="edge_target" value="sensor.nick_r_sleep_minutes_asleep" data-edge-target>
+        <input name="edge_label" value="prior-mood-sleep" data-edge-label>
+      </div>
+    
+      <div class="dag-edge-row" data-dag-edge-row>
+        <input name="edge_source" value="derived.nick_r_mood_score_lag1" data-edge-source>
+        <input name="edge_target" value="sensor.nick_r_steps" data-edge-target>
+        <input name="edge_label" value="prior-mood-activity" data-edge-label>
+      </div>
+
+      <div class="dag-edge-row" data-dag-edge-row>
         <input name="edge_source" value="sensor.nick_r_sleep_minutes_asleep" data-edge-source>
         <input name="edge_target" value="sensor.nick_r_mood_score" data-edge-target>
-        <input name="edge_label" value="effect" data-edge-label>
-      </div>
-    
-      <div class="dag-edge-row" data-dag-edge-row>
-        <input name="edge_source" value="sensor.nick_r_steps" data-edge-source>
-        <input name="edge_target" value="sensor.nick_r_sleep_minutes_asleep" data-edge-target>
-        <input name="edge_label" value="activity-sleep" data-edge-label>
+        <input name="edge_label" value="sleep-panas" data-edge-label>
       </div>
     
       <div class="dag-edge-row" data-dag-edge-row>
         <input name="edge_source" value="sensor.nick_r_steps" data-edge-source>
         <input name="edge_target" value="sensor.nick_r_mood_score" data-edge-target>
-        <input name="edge_label" value="adjust" data-edge-label>
+        <input name="edge_label" value="activity-panas" data-edge-label>
       </div>
     
   </div>
@@ -792,16 +879,14 @@
         Causal inference method
         <select name="analysis_method" data-analysis-method>
           
-            <option value="dag_auto" >Choose from DAG</option>
-          
-            <option value="g_formula" selected>Default: G-formula / outcome model</option>
+            <option value="g_formula" selected>Recommended: G-formula / outcome model</option>
           
             <option value="ipw" >Inverse probability weighting (IPW)</option>
           
             <option value="doubly_robust" >Doubly robust / AIPW</option>
           
         </select>
-        <span class="shadow-text">Methods available from the DAG: IPW, G-formula, and doubly robust estimation.</span>
+        <span class="shadow-text">Already selected for this demo. Change only if you want a specific causal estimator.</span>
       </label>
       <div class="method-equation" data-method-equation aria-live="polite"></div>
 
@@ -818,63 +903,33 @@
       <input type="hidden" name="exclude_before_sleep_start_minutes" value="0">
 
       <datalist id="covariate-sensor-options">
-        
-          <option value="sensor.nick_r_sleep_minutes_asleep">Covariate · Total minutes asleep during the prior sleep period.</option>
-        
-          <option value="binary_sensor.pantry_door_window">Covariate · This is my pantry door that I get food out of. On means I opened it, Off means I closed it</option>
-        
-          <option value="sensor.nick_r_steps">Covariate · The number of steps I take a day. It is cumulative for each day.</option>
-        
-          <option value="sensor.nutribullet_plug_current">Covariate · the number of amps going through my nutribullet. A value over 1 means I made a smoothie at that time</option>
-        
-          <option value="binary_sensor.bthome_sensor_ee5c_window">Covariate · This is my refrigerator door that I get food out of in my room. On means I opened it, Off means I closed it</option>
-        
-        
-          <option value="sensor.nick_r_mood_score">Sleep sensor · previous-night predictor · Daily PANAS summed score on a 10 to 50 scale, where lower values indicate lower affect.</option>
-        
-          <option value="sensor.nick_r_awakenings_count">Sleep sensor · previous-night predictor · Number of recorded awakenings during a sleep session.</option>
-        
-          <option value="sensor.nick_r_sleep_minutes_awake">Sleep sensor · previous-night predictor · Minutes recorded awake during the sleep window.</option>
-        
-          <option value="sensor.nick_r_sleep_time_in_bed">Sleep sensor · previous-night predictor · Total minutes recorded in bed.</option>
-        
-          <option value="sensor.nick_r_sleep_minutes_to_fall_asleep">Sleep sensor · previous-night predictor · Minutes recorded before falling asleep.</option>
-        
-          <option value="sensor.nick_r_sleep_efficiency">Sleep sensor · previous-night predictor · Sleep efficiency percentage from the sleep tracker.</option>
-        
-          <option value="sensor.nick_r_sleep_start_time">Sleep sensor · previous-night predictor · Reported sleep start time.</option>
-        
+
+          <option value="derived.nick_r_mood_score_lag1">Covariate · Prior-day PANAS Score derived from the simulated PANAS Score.</option>
+
+          <option value="sensor.nick_r_sleep_minutes_asleep">Covariate · Simulated total minutes asleep during the prior sleep period.</option>
+
+          <option value="sensor.nick_r_steps">Covariate · Simulated daily step count.</option>
+
+          <option value="sensor.nick_r_mood_score">Simulated outcome · previous-day predictor · Simulated daily PANAS summed score on a 10 to 50 scale, where lower values indicate lower affect.</option>
+
       </datalist>
       <datalist id="all-sensor-options">
-        
-          <option value="sensor.nick_r_mood_score">Outcome (Dependent) · Daily PANAS summed score on a 10 to 50 scale, where lower values indicate lower affect.</option>
-        
-          <option value="sensor.nick_r_awakenings_count">Outcome (Dependent) · Number of recorded awakenings during a sleep session.</option>
-        
-          <option value="sensor.nick_r_sleep_minutes_awake">Outcome (Dependent) · Minutes recorded awake during the sleep window.</option>
-        
-          <option value="sensor.nick_r_sleep_time_in_bed">Outcome (Dependent) · Total minutes recorded in bed.</option>
-        
-          <option value="sensor.nick_r_sleep_minutes_asleep">covariate · Total minutes asleep during the prior sleep period.</option>
-        
-          <option value="sensor.nick_r_sleep_minutes_to_fall_asleep">Outcome (Dependent) · Minutes recorded before falling asleep.</option>
-        
-          <option value="sensor.nick_r_sleep_efficiency">Outcome (Dependent) · Sleep efficiency percentage from the sleep tracker.</option>
-        
-          <option value="sensor.nick_r_sleep_start_time">Outcome (Dependent) · Reported sleep start time.</option>
-        
-          <option value="binary_sensor.pantry_door_window">covariate · This is my pantry door that I get food out of. On means I opened it, Off means I closed it</option>
-        
-          <option value="sensor.nick_r_steps">covariate · The number of steps I take a day. It is cumulative for each day.</option>
-        
-          <option value="sensor.nutribullet_plug_current">covariate · the number of amps going through my nutribullet. A value over 1 means I made a smoothie at that time</option>
-        
-          <option value="binary_sensor.bthome_sensor_ee5c_window">covariate · This is my refrigerator door that I get food out of in my room. On means I opened it, Off means I closed it</option>
+
+          <option value="derived.nick_r_mood_score_lag1">covariate · Prior-day PANAS Score derived from the simulated PANAS Score.</option>
+
+          <option value="sensor.nick_r_mood_score">Outcome (Dependent) · Simulated daily PANAS summed score on a 10 to 50 scale, where lower values indicate lower affect.</option>
+
+          <option value="sensor.nick_r_sleep_minutes_asleep">covariate · Simulated total minutes asleep during the prior sleep period.</option>
+
+          <option value="sensor.nick_r_steps">covariate · Simulated daily step count.</option>
         
       </datalist>
       
         <input type="hidden" name="predictor_entities" value="sensor.nick_r_steps">
         <input type="hidden" name="predictor_aggregations" value="max">
+        <input type="hidden" name="predictor_day_offsets" value="1">
+        <input type="hidden" name="predictor_entities" value="derived.nick_r_mood_score_lag1">
+        <input type="hidden" name="predictor_aggregations" value="last">
         <input type="hidden" name="predictor_day_offsets" value="1">
       
 

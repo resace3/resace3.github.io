@@ -64,9 +64,8 @@
               <input autocomplete="off" data-sidebar-field="node_label">
             </label>
             <label>
-              Sensor mapping
+              Simulated variable
               <input list="dag-sensor-options" autocomplete="off" data-sidebar-field="node_id" data-entity-search-input>
-              <span class="field-error" data-sidebar-sensor-error hidden>Sensor not found.</span>
             </label>
             <label>
               Role
@@ -78,29 +77,32 @@
               </select>
             </label>
             <label>
-              Daily aggregate
-              <select data-sidebar-field="node_aggregation">
-                <option value="last">Last</option>
-                <option value="sum">Sum / count</option>
-                <option value="mean">Mean</option>
-                <option value="min">Min</option>
-                <option value="max">Max</option>
-              </select>
-            </label>
-            <div class="dag-time-grid">
-              <label>
-                From time
-                <input type="time" data-sidebar-field="node_time_start">
-              </label>
-              <label>
-                To time
-                <input type="time" data-sidebar-field="node_time_end">
-              </label>
-            </div>
-            <label>
               Lag days
               <input type="number" min="0" max="21" data-sidebar-field="node_day_lag">
             </label>
+            <details class="sidebar-advanced-settings">
+              <summary>Advanced</summary>
+              <label>
+                Daily aggregate
+                <select data-sidebar-field="node_aggregation">
+                  <option value="last">Last</option>
+                  <option value="sum">Sum / count</option>
+                  <option value="mean">Mean</option>
+                  <option value="min">Min</option>
+                  <option value="max">Max</option>
+                </select>
+              </label>
+              <div class="dag-time-grid">
+                <label>
+                  From time
+                  <input type="time" data-sidebar-field="node_time_start">
+                </label>
+                <label>
+                  To time
+                  <input type="time" data-sidebar-field="node_time_end">
+                </label>
+              </div>
+            </details>
             <button class="button small-button" type="button" data-sidebar-next="preparation">Next: data preparation</button>
           </div>
           <div class="sidebar-section sidebar-tab-panel" data-sidebar-panel="preparation" hidden>

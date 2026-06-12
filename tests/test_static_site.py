@@ -84,14 +84,42 @@ def test_static_causal_dag_snapshot_contains_analysis_result_payload():
     assert 'data-analysis-results' in html
     assert "PANAS Score" in html
     assert "PANAS Score below 33" in html
-    assert "Daily PANAS summed score on a 10 to 50 scale" in html
+    assert "Simulated daily PANAS summed score on a 10 to 50 scale" in html
     assert "value=\"33\"" in html
     assert "5.7" not in html
     assert "Mood score" not in html
-    assert "Sleep duration and low mood" in html
-    assert "95% CI -0.63 to -0.18" in html
-    assert "Predicted probability of low mood" in html
-    assert "Estimated mood difference" in html
+    assert "Clinician summary" in html
+    assert "Recommended: G-formula / outcome model" in html
+    assert "Default (recommended): G-formula / outcome model" not in html
+    assert "Already selected for this demo. Change only if you want a specific causal estimator." in html
+    assert "Choose from DAG" not in html
+    assert "PANAS Score (t-1)" in html
+    assert "Sleep may contribute to current PANAS Score changes" in html
+    assert "What the DAG says may cause what" in html
+    assert "Prior PANAS Score may affect Sleep" in html
+    assert "Prior PANAS Score may affect Steps" in html
+    assert "Steps may contribute to current PANAS Score changes" in html
+    assert "Show plots and technical details" in html
+    assert "95% CI -0.54 to 1.99" in html
+    assert "Predicted PANAS Score" in html
+    assert "Estimated PANAS Score difference" in html
+    assert "Advanced results" not in html
+    assert "Effect estimate distribution" not in html
+    assert "effect distribution" not in html
+    assert "Sensor not found" not in html
+    assert "Home Assistant" not in html
+
+
+def test_static_causal_dag_sidebar_advanced_toggle_contains_aggregate_controls():
+    html = (ROOT / "causal-dag.html").read_text(encoding="utf-8")
+
+    assert "Simulated variable" in html
+    assert '<details class="sidebar-advanced-settings">' in html
+    assert "<summary>Advanced</summary>" in html
+    assert html.index("<summary>Advanced</summary>") < html.index("Daily aggregate")
+    assert html.index("Daily aggregate") < html.index("From time") < html.index("To time")
+    assert "binary_sensor.pantry_door_window" not in html
+    assert "sensor.nutribullet_plug_current" not in html
 
 
 def test_static_causal_dag_snapshot_owns_static_analysis_submit_flow():

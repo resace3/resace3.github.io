@@ -2,22 +2,22 @@
 {% block content %}
 <section class="header">
   <div>
-    <p class="eyebrow">Configured Home Assistant entities</p>
-    <h1>Sensor maps</h1>
+    <p class="eyebrow">Configured simulated variables</p>
+    <h1>Variable maps</h1>
   </div>
 </section>
 
 <section class="panel add-sensor-panel">
   <div class="panel-heading">
     <div>
-      <h2>Add sensor</h2>
-      <p class="muted">Classify each entity as a sleep outcome or a non-sleep covariate.</p>
+      <h2>Add simulated variable</h2>
+      <p class="muted">Only the built-in demo variables are available in this personal website version.</p>
     </div>
   </div>
   <form method="post" action="{{ url_for('add_sensor_map') }}" class="add-sensor-form">
     <label>
-      Sensor
-      <input name="sensor" placeholder="sensor.example" autocomplete="off">
+      Variable ID
+      <input name="sensor" placeholder="sensor.nick_r_steps" autocomplete="off">
     </label>
     <label>
       Role
@@ -28,9 +28,9 @@
     </label>
     <label>
       Description
-      <input name="description" placeholder="What this sensor represents" autocomplete="off">
+      <input name="description" placeholder="What this simulated variable represents" autocomplete="off">
     </label>
-    <button type="submit">Add sensor</button>
+    <button type="submit">Add simulated variable</button>
   </form>
 </section>
 
@@ -40,7 +40,7 @@
       <table class="sensor-map-table">
         <thead>
           <tr>
-            <th>Sensor</th>
+            <th>Variable ID</th>
             <th>Role</th>
             <th>Description</th>
             <th>Actions</th>
@@ -74,7 +74,7 @@
         </tbody>
       </table>
     </div>
-    <button type="submit">Save sensor maps</button>
+    <button type="submit">Save variable maps</button>
   </form>
 
   {% for row in config.sensor_maps %}

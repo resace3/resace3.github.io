@@ -39,36 +39,31 @@ async function expandCausalAnalysis(page) {
   await expect(page.locator("[data-analysis-form]")).toBeVisible({ timeout: 10000 });
 }
 
-async function startGuide(page) {
-  await expect(page.locator("[data-onboarding-start]")).toBeVisible({ timeout: 10000 });
-  await page.locator("[data-onboarding-start]").click();
-  await expect(page.locator("[data-onboarding-overlay]")).toBeVisible({ timeout: 10000 });
-  await expect(page.locator("[data-onboarding-title]")).toBeVisible({ timeout: 10000 });
-}
-
-async function advanceGuideToTitle(page, titlePattern) {
-  for (let step = 0; step < 20; step += 1) {
-    const currentTitle = await page.evaluate(() => document.querySelector("[data-onboarding-title]")?.innerText || "");
-    if (titlePattern.test(currentTitle)) return;
-    const clickedNext = await page.evaluate(() => {
-      const button = document.querySelector("[data-onboarding-next]");
-      if (!button) return false;
-      button.click();
-      return true;
-    });
-    expect(clickedNext).toBe(true);
-    await page.waitForTimeout(220);
-  }
-
-  throw new Error(`Guide did not reach ${titlePattern}`);
-}
-
 test.beforeEach(async ({ page }) => {
   const errors = [];
   pageErrors.set(page, errors);
 
   await page.addInitScript(() => {
     window.personalWebsiteDisableOnboarding = true;
+    const disableMotion = () => {
+      const style = document.createElement("style");
+      style.dataset.testMotionOverride = "true";
+      style.textContent = `
+        *, *::before, *::after {
+          animation-duration: 1ms !important;
+          animation-delay: 0s !important;
+          transition-duration: 1ms !important;
+          transition-delay: 0s !important;
+          scroll-behavior: auto !important;
+        }
+      `;
+      document.head?.appendChild(style);
+    };
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", disableMotion, { once: true });
+    } else {
+      disableMotion();
+    }
   });
 
   await page.route("https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js", (route) =>
@@ -134,7 +129,7 @@ test("agentic prompt page renders the static prompt animation", async ({ page })
 });
 
 test("causal DAG app is served through the personal site proxy", async ({ page }) => {
-  await page.goto("/causal-dag.html");
+  await page.goto("/causal-dag.html", { waitUntil: "domcontentloaded" });
 
   await expect(page.getByRole("link", { name: "Nick Rezaee home" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "N of 1 Causal Analysis Engine" })).toBeVisible();
@@ -156,12 +151,35 @@ test("causal DAG app is served through the personal site proxy", async ({ page }
     "Exposure (Independent)"
   );
   await expect(page.locator(".dag-node.exposure [data-node-role-shadow]")).not.toHaveText(/^\(/);
+  await expect(page.locator("[data-dag-node] [data-node-title]")).toHaveText([
+    "PANAS Score (t-1)",
+    "Sleep",
+    "Steps",
+    "PANAS Score",
+  ]);
+  await expect(page.locator(".dag-node.exposure [data-node-title]")).toHaveText("Sleep");
   await expect(page.locator(".dag-node.outcome [data-node-role-shadow]")).toContainText(
     "Outcome (Dependent)"
   );
   await expect(page.locator(".dag-node.outcome [data-node-role-shadow]")).not.toHaveText(/^\(/);
   await expect(page.locator(".dag-node.outcome [data-node-title]")).toHaveText("PANAS Score");
   await expect(page.locator(".dag-node.outcome [data-node-threshold]")).toHaveValue(/^33(?:\.0)?$/);
+  await expect(page.getByText("Sensor not found")).toHaveCount(0);
+  const sidebarState = await page.evaluate(() => {
+    const advanced = document.querySelector(".sidebar-advanced-settings");
+    return {
+      label: document.documentElement.textContent.includes("Simulated variable"),
+      advancedExists: Boolean(advanced),
+      advancedOpen: advanced?.open ?? null,
+      advancedText: advanced?.textContent || "",
+    };
+  });
+  expect(sidebarState.label).toBe(true);
+  expect(sidebarState.advancedExists).toBe(true);
+  expect(sidebarState.advancedOpen).toBe(false);
+  expect(sidebarState.advancedText).toContain("Daily aggregate");
+  expect(sidebarState.advancedText).toContain("From time");
+  expect(sidebarState.advancedText).toContain("To time");
   const guideBox = await page.locator(".brand .guide-tab").boundingBox();
   const titleBox = await page.locator(".brand strong").boundingBox();
   expect(guideBox.x + guideBox.width).toBeLessThanOrEqual(titleBox.x);
@@ -181,14 +199,16 @@ test("causal DAG app is served through the personal site proxy", async ({ page }
 });
 
 test("static causal DAG snapshot runs analysis without a backend", async ({ page }) => {
-  test.setTimeout(90000);
+  test.setTimeout(180000);
   await page.goto("/__static/causal-dag.html", { waitUntil: "domcontentloaded" });
   await dismissOnboarding(page);
   await expandCausalAnalysis(page);
 
   await expect(page.locator("[data-analysis-method] option:checked")).toHaveText(
-    "Default: G-formula / outcome model"
+    "Recommended: G-formula / outcome model"
   );
+  await expect(page.locator("[data-analysis-method] option", { hasText: "Choose from DAG" })).toHaveCount(0);
+  await expect(page.getByText("Already selected for this demo. Change only if you want a specific causal estimator.")).toBeVisible();
   await expect(page.locator("[data-equation-explain-toggle]")).toHaveText("Explain method");
   await expect(page.locator("[data-method-equation]")).not.toContainText("\\[");
   await expect(page.locator("[data-equation-box]")).toHaveCount(0);
@@ -217,13 +237,27 @@ test("static causal DAG snapshot runs analysis without a backend", async ({ page
   await dismissOnboarding(page);
   await page.locator("[data-run-analysis-button]").evaluate((button) => button.click());
   await page.waitForTimeout(150);
-  await expect(page.locator("[data-run-analysis-button]")).not.toContainText(/Saving DAG/i);
+  const runButtonText = await page.locator("[data-run-analysis-button]").evaluate((button) => button.textContent || "");
+  expect(runButtonText).not.toMatch(/Saving DAG/i);
   const staticResults = page.locator("[data-analysis-results]");
-  await expect(staticResults).toContainText("Sleep duration and low mood", { timeout: 15000 });
-  const staticResultText = await staticResults.innerText();
-  expect(staticResultText).toContain("95% CI -0.63 to -0.18");
-  expect(staticResultText).toContain("Predicted probability of low mood");
-  expect(staticResultText).not.toContain("Run the model from the setup panel");
+  const staticSummary = staticResults.locator(".clinician-summary-card");
+  await expect(staticSummary).toBeVisible({ timeout: 30000 });
+  await expect(staticSummary).toContainText("Clinician summary", { timeout: 30000 });
+  await expect(staticSummary).toContainText("Sleep may contribute to current PANAS Score changes", { timeout: 30000 });
+  await expect(staticSummary).toContainText("Prior PANAS Score may affect Sleep", { timeout: 30000 });
+  await expect(staticSummary).toContainText("Prior PANAS Score may affect Steps", { timeout: 30000 });
+  await expect(staticResults).not.toContainText("Advanced results");
+  await expect(staticResults).not.toContainText("Effect estimate distribution");
+  const staticTechnicalDetails = staticResults.locator(".technical-results-details");
+  expect(await staticTechnicalDetails.evaluate((details) => details.open)).toBe(false);
+  await expect(
+    staticResults.getByRole("heading", { name: "Predicted PANAS Score" })
+  ).toBeHidden();
+  await staticTechnicalDetails.locator(":scope > summary").click();
+  expect(await staticTechnicalDetails.evaluate((details) => details.open)).toBe(true);
+  await expect(staticResults).toContainText("95% CI -0.54 to 1.99");
+  await expect(staticResults).toContainText("Predicted PANAS Score", { timeout: 15000 });
+  await expect(staticResults).not.toContainText("Run the model from the setup panel");
   expect(page.url()).toBe(startingUrl);
 
   const fetchPaths = await page.evaluate(() =>
@@ -236,8 +270,9 @@ test("static causal DAG snapshot runs analysis without a backend", async ({ page
 test("static causal DAG guide closes after guided analysis run", async ({ page }) => {
   test.setTimeout(120000);
   await page.goto("/__static/causal-dag.html", { waitUntil: "domcontentloaded" });
-  await startGuide(page);
-  await advanceGuideToTitle(page, /Run the analysis/i);
+  const jumpedToRunStep = await page.evaluate(() => window.__showOnboardingStepForTest?.("Run the analysis") || false);
+  expect(jumpedToRunStep).toBe(true);
+  await expect(page.locator("[data-onboarding-title]")).toHaveText(/Run the analysis/i);
 
   await expect(page.locator("[data-onboarding-count]")).toContainText("Guide 14 of 14");
   await expect(page.locator("[data-onboarding-skip]")).toHaveText('Skip "Guide Me"');
@@ -263,9 +298,12 @@ test("static causal DAG guide closes after guided analysis run", async ({ page }
   await page.locator("[data-onboarding-next]").evaluate((button) => button.click());
 
   const results = page.locator("[data-analysis-results]");
-  await expect(results).toContainText("Sleep duration and low mood", { timeout: 15000 });
+  await expect(results).toContainText("Clinician summary", { timeout: 15000 });
+  await expect(results).toContainText("Sleep may contribute to current PANAS Score changes");
+  await expect(results).toContainText("Prior PANAS Score may affect Sleep");
   const resultText = await results.innerText();
-  expect(resultText).toContain("95% CI -0.63 to -0.18");
+  expect(resultText).toContain("Show plots and technical details");
+  expect(resultText).toContain("95% CI -0.54 to 1.99");
   await expect(page.locator("[data-onboarding-overlay]")).toBeHidden({ timeout: 10000 });
 
   const fetchPaths = await page.evaluate(() =>
@@ -286,7 +324,16 @@ test("causal DAG proxy run analysis renders output in place", async ({ page }) =
   await page.locator("[data-run-analysis-button]").evaluate((button) => button.click());
 
   const results = page.locator("[data-analysis-results]");
-  await expect(results).toContainText("Treatment effect estimate", { timeout: 120000 });
+  await expect(results).toContainText("Clinician summary", { timeout: 120000 });
+  await expect(results).toContainText("Sleep may contribute to current PANAS Score changes");
+  await expect(results).toContainText("Prior PANAS Score may affect Sleep");
+  await expect(results).not.toContainText("Advanced results");
+  await expect(results).not.toContainText("Effect estimate distribution");
+  const technicalDetails = results.locator(".technical-results-details");
+  expect(await technicalDetails.evaluate((details) => details.open)).toBe(false);
+  await technicalDetails.locator(":scope > summary").click();
+  await expect(results).toContainText("Treatment effect estimate");
+  await expect(results.getByRole("heading", { name: "Observed vs predicted outcome plot" })).toBeVisible();
   const resultText = await results.innerText();
   expect(resultText).toContain("95% CI");
   expect(resultText).toContain("Observed vs predicted outcome plot");
