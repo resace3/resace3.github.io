@@ -725,7 +725,7 @@ h3 {
 
 .new-project-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
 }
 
@@ -775,7 +775,6 @@ h3 {
 
 .health-bubble {
   --bubble-color: #6d5dfc;
-  grid-column: 1 / -1;
 }
 
 .bubble-orbit {

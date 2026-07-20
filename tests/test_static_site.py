@@ -76,11 +76,23 @@ def test_activity_health_demo_has_synthetic_data_disclosure_and_local_assets():
     assert "Day comparison" not in html
 
 
+def test_new_projects_page_shows_three_equal_bubble_cards():
+    html = (ROOT / "new-projects.html").read_text(encoding="utf-8")
+    css = (ROOT / "style.css").read_text(encoding="utf-8")
+
+    assert html.count('class="new-project-card') == 3
+    assert 'href="activity-health-demo.html"' in html
+    assert "Activity Health Insights" in html
+    assert 'href="style.css?v=20260720.3"' in html
+    assert "grid-template-columns: repeat(3, minmax(0, 1fr));" in css
+    assert ".health-bubble {\n  --bubble-color: #6d5dfc;\n}" in css
+
+
 def test_new_projects_decorations_and_mobile_header_stay_in_viewport():
     html = (ROOT / "new-projects.html").read_text(encoding="utf-8")
     css = (ROOT / "style.css").read_text(encoding="utf-8")
 
-    assert 'href="style.css?v=20260720.2"' in html
+    assert 'href="style.css?v=20260720.3"' in html
 
     orb_rule = css.split(".new-projects-hero::before {", 1)[1].split("}", 1)[0]
     assert "right: 0;" in orb_rule
