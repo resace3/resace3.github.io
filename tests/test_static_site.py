@@ -72,8 +72,8 @@ def test_activity_health_demo_has_synthetic_data_disclosure_and_local_assets():
 
     assert "Synthetic people and virtual step data only" in html
     assert "Nothing is sent or stored" in html
-    assert 'src="activity-health-demo.js?v=20260720.5"' in html
-    assert 'href="activity-health-demo.css?v=20260720.2"' in html
+    assert 'src="activity-health-demo.js?v=20260720.4"' in html
+    assert 'href="activity-health-demo.css?v=20260719.1"' in html
     assert "Day comparison" not in html
 
 

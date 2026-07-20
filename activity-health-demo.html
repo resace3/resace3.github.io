@@ -6,7 +6,7 @@
   <meta name="description" content="Interactive synthetic-data demo of Activity Health Insights by Nick Rezaee.">
   <title>Activity Health Insights Demo | Nick Rezaee</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="activity-health-demo.css?v=20260720.2">
+  <link rel="stylesheet" href="activity-health-demo.css?v=20260719.1">
 </head>
 <body class="health-demo-page">
   <header class="site-header">
@@ -143,43 +143,6 @@
             <div><h2>Most active window</h2><strong data-active-window>Loading…</strong><p>Your highest synthetic four-hour window</p></div>
           </article>
         </div>
-        <article class="health-card fourier-card">
-          <div class="card-title-row fourier-title-row">
-            <div>
-              <h2>Fourier series fit</h2>
-              <p class="card-subtitle">A smooth 24-hour rhythm fitted to the same virtual hourly steps</p>
-            </div>
-            <div class="fourier-legend" aria-label="Chart legend">
-              <span><i class="observed-dot" aria-hidden="true"></i>Hourly steps</span>
-              <span><i class="fitted-line" aria-hidden="true"></i>3-harmonic fit</span>
-            </div>
-          </div>
-          <div class="fourier-layout">
-            <div class="fourier-plot">
-              <svg viewBox="0 0 1000 280" preserveAspectRatio="none" role="img" aria-label="Three-harmonic Fourier series fitted to synthetic hourly steps" data-fourier-chart>
-                <g class="fourier-grid" aria-hidden="true">
-                  <line x1="24" y1="24" x2="988" y2="24" />
-                  <line x1="24" y1="92" x2="988" y2="92" />
-                  <line x1="24" y1="160" x2="988" y2="160" />
-                  <line x1="24" y1="228" x2="988" y2="228" />
-                </g>
-                <path class="fourier-area" data-fourier-area />
-                <path class="fourier-line" data-fourier-line />
-                <g class="fourier-points" data-fourier-points></g>
-              </svg>
-              <div class="hour-axis"><span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>12 AM</span></div>
-            </div>
-            <aside class="fourier-explainer">
-              <span class="fourier-score" data-fourier-score>3 harmonics · calculating fit…</span>
-              <p class="fourier-equation" aria-label="Fourier series equation">ŷ(t) = a₀ + Σ [aₖ cos(2πkt/24) + bₖ sin(2πkt/24)]</p>
-              <p>Three sine-and-cosine pairs capture the broad daily rhythm while smoothing over hour-to-hour noise.</p>
-              <dl>
-                <div><dt>Period</dt><dd>24 hours</dd></div>
-                <div><dt>Fitted peak</dt><dd data-fourier-peak>Calculating…</dd></div>
-              </dl>
-            </aside>
-          </div>
-        </article>
         <aside class="health-info-banner"><span aria-hidden="true">i</span><p data-rhythm-note>Regular activity throughout a virtual day supports a more balanced pattern.</p></aside>
       </section>
 
@@ -250,6 +213,6 @@
   </dialog>
 
   <script src="script.js?v=20260720.1"></script>
-  <script src="activity-health-demo.js?v=20260720.5"></script>
+  <script src="activity-health-demo.js?v=20260720.4"></script>
 </body>
 </html>

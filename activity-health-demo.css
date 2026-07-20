@@ -208,28 +208,6 @@
 .clock-icon { display: grid; flex: 0 0 auto; width: 50px; height: 50px; place-items: center; border-radius: 15px; color: var(--health-purple); background: #f0ecff; font-size: 1.8rem; }
 .active-window-card strong { display: block; margin: 10px 0 5px; font-size: clamp(1.6rem, 3vw, 2.1rem); }
 .active-window-card p { margin: 0; color: var(--health-muted); font-size: 0.76rem; }
-.fourier-card { margin-top: 16px; padding: 22px; }
-.fourier-title-row { align-items: flex-start; gap: 20px; }
-.fourier-legend { display: flex; align-items: center; justify-content: flex-end; gap: 16px; flex-wrap: wrap; color: #62708b; font-size: 0.7rem; }
-.fourier-legend span { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
-.fourier-legend i { display: inline-block; flex: 0 0 auto; }
-.observed-dot { width: 9px; height: 9px; border: 2px solid #fff; border-radius: 50%; background: #7b72fa; box-shadow: 0 0 0 2px #7b72fa; }
-.fitted-line { width: 22px; height: 3px; border-radius: 999px; background: var(--health-blue); }
-.fourier-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(250px, 0.65fr); align-items: stretch; gap: 24px; margin-top: 22px; }
-.fourier-plot { min-width: 0; }
-.fourier-plot svg { display: block; width: 100%; height: 280px; overflow: visible; }
-.fourier-grid line { stroke: #e8ecf4; stroke-width: 1; vector-effect: non-scaling-stroke; }
-.fourier-area { fill: rgba(49, 92, 244, 0.08); }
-.fourier-line { fill: none; stroke: var(--health-blue); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-.fourier-points circle { fill: #7b72fa; stroke: #fff; stroke-width: 2.5; vector-effect: non-scaling-stroke; }
-.fourier-explainer { display: flex; min-width: 0; flex-direction: column; justify-content: center; gap: 15px; padding: 20px; border: 1px solid #e0e6f2; border-radius: 16px; color: var(--health-muted); background: linear-gradient(145deg, #f8f9ff, #f3f5fb); font-size: 0.76rem; line-height: 1.55; }
-.fourier-explainer p { margin: 0; }
-.fourier-score { width: fit-content; padding: 7px 10px; border: 1px solid #cfd9ff; border-radius: 999px; color: #2d4cc8; background: #edf1ff; font-size: 0.72rem; font-weight: 900; }
-.fourier-equation { overflow-wrap: anywhere; color: #233253; font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 0.72rem; font-weight: 700; }
-.fourier-explainer dl { display: grid; gap: 8px; margin: 0; }
-.fourier-explainer dl div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-top: 8px; border-top: 1px solid #dfe5f0; }
-.fourier-explainer dt { color: #67748e; }
-.fourier-explainer dd { margin: 0; color: var(--health-ink); font-weight: 900; }
 .health-info-banner { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 15px 18px; border: 1px solid #dbe2f1; border-radius: 14px; color: #53617e; background: rgba(255, 255, 255, 0.7); font-size: 0.76rem; }
 .health-info-banner > span { display: grid; width: 28px; height: 28px; place-items: center; border: 2px solid var(--health-blue); border-radius: 50%; color: var(--health-blue); font-weight: 900; }
 .health-info-banner p { margin: 0; }
@@ -257,7 +235,7 @@
 .dialog-close { position: absolute; top: 16px; right: 16px; display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid #d9e0ed; border-radius: 50%; color: #39465f; background: #f8f9fc; font-size: 1.3rem; cursor: pointer; }
 
 @media (max-width: 900px) {
-  .overview-top-grid, .overview-bottom-grid, .rhythm-grid, .fourier-layout { grid-template-columns: 1fr; }
+  .overview-top-grid, .overview-bottom-grid, .rhythm-grid { grid-template-columns: 1fr; }
   .active-window-card { min-height: 190px; }
   .health-bubble { grid-column: auto; }
 }
@@ -283,7 +261,7 @@
   .health-tab { min-height: 52px; padding: 0 4px; font-size: 0.72rem; line-height: 1.15; }
   .health-tab svg { display: none; }
   .health-panel { padding: 16px; }
-  .risk-card, .weekly-card, .survival-card, .change-card, .meaning-card, .hourly-card, .fourier-card { padding: 18px; }
+  .risk-card, .weekly-card, .survival-card, .change-card, .meaning-card, .hourly-card { padding: 18px; }
   .weekly-summary { grid-template-columns: auto 1fr; }
   .generate-week-button { grid-column: 1 / -1; max-width: none; }
   .weekly-chart { gap: 7px; }
@@ -292,11 +270,6 @@
   .y-label { left: -35px; }.y75 { top: 45px; }.y50 { top: 90px; }.y25 { top: 135px; }.y0 { top: 180px; }
   .hourly-card { min-height: 390px; }
   .hourly-chart { height: 260px; gap: 3px; }
-  .fourier-title-row { align-items: flex-start; flex-direction: column; }
-  .fourier-legend { justify-content: flex-start; }
-  .fourier-layout { gap: 16px; }
-  .fourier-plot svg { height: 220px; }
-  .fourier-explainer { padding: 16px; }
   .form-grid.two-columns, .form-grid.three-columns { grid-template-columns: 1fr; }
   .form-grid label.span-two { grid-column: auto; }
   .configuration-intro { align-items: flex-start; flex-direction: column; }

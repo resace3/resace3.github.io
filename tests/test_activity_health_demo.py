@@ -83,17 +83,3 @@ def test_removed_day_comparison_is_not_reintroduced():
     assert "No earlier baseline is available" not in HTML
     assert "Unavailable" not in HTML
     assert "comparison-morning" not in SCRIPT
-
-
-def test_activity_rhythm_includes_a_real_fourier_series_fit():
-    assert "Fourier series fit" in HTML
-    assert "3-harmonic fit" in HTML
-    assert 'data-fourier-chart' in HTML
-    assert 'data-fourier-line' in HTML
-    assert 'data-fourier-points' in HTML
-    assert 'data-fourier-score' in HTML
-    assert 'data-fourier-peak' in HTML
-    assert "solveLinearSystem" in SCRIPT
-    assert "fitFourierSeries(hourly, 3)" in SCRIPT
-    assert "2 * Math.PI * harmonic * hour / 24" in SCRIPT
-    assert "rSquared" in SCRIPT
