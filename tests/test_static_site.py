@@ -1,3 +1,4 @@
+import re
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -83,7 +84,7 @@ def test_new_projects_page_shows_three_equal_bubble_cards():
     assert html.count('class="new-project-card') == 3
     assert 'href="activity-health-demo.html"' in html
     assert "Activity Health Insights" in html
-    assert 'href="style.css?v=20260720.3"' in html
+    assert 'href="style.css?v=20260720.4"' in html
     assert "grid-template-columns: repeat(3, minmax(0, 1fr));" in css
     assert ".health-bubble {\n  --bubble-color: #6d5dfc;\n}" in css
 
@@ -92,7 +93,7 @@ def test_new_projects_decorations_and_mobile_header_stay_in_viewport():
     html = (ROOT / "new-projects.html").read_text(encoding="utf-8")
     css = (ROOT / "style.css").read_text(encoding="utf-8")
 
-    assert 'href="style.css?v=20260720.3"' in html
+    assert 'href="style.css?v=20260720.4"' in html
 
     orb_rule = css.split(".new-projects-hero::before {", 1)[1].split("}", 1)[0]
     assert "right: 0;" in orb_rule
@@ -102,6 +103,19 @@ def test_new_projects_decorations_and_mobile_header_stay_in_viewport():
     assert "grid-template-columns: repeat(3, minmax(0, 1fr));" in mobile_rules
     assert ".brand-group" in mobile_rules
     assert ".new-projects-badge" in mobile_rules
+
+
+def test_activity_health_project_card_needle_matches_displayed_risk():
+    html = (ROOT / "new-projects.html").read_text(encoding="utf-8")
+    css = (ROOT / "style.css").read_text(encoding="utf-8")
+
+    risk = float(re.search(r'class="health-mini-risk">([\d.]+)%', html).group(1))
+    needle_rule = css.split(".health-mini-gauge i {", 1)[1].split("}", 1)[0]
+    angle = float(re.search(r"transform: rotate\(([\d.]+)deg\);", needle_rule).group(1))
+
+    assert angle == 180 + risk / 20 * 180
+    assert 180 < angle < 270
+    assert "transform-origin: left center;" in needle_rule
 
 
 def test_static_causal_dag_snapshot_intercepts_backend_histogram_calls():
