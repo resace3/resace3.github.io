@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 @pytest.mark.parametrize(
     "page_name",
-    ["index.html", "new-projects.html", "causal-dag.html", "agentic-prompt.html"],
+    ["index.html", "new-projects.html", "causal-dag.html", "agentic-prompt.html", "activity-health-demo.html"],
 )
 def test_static_pages_keep_personal_site_navigation(page_name):
     html = (ROOT / page_name).read_text(encoding="utf-8")

@@ -4,13 +4,15 @@ Personal portfolio site for Nick Rezaee, with project pages for open source heal
 
 - Causal DAG Builder / N-of-1 Causal Analysis Engine
 - Agentic Prompt App concept page
+- Activity Health Insights interactive synthetic-data demo
 
 The repository is published from `main` through GitHub Pages at `resace3.github.io`.
 
 ## Project Structure
 
-- `index.html`, `new-projects.html`, `agentic-prompt.html`: public site pages
+- `index.html`, `new-projects.html`, `agentic-prompt.html`, `activity-health-demo.html`: public site pages
 - `style.css`, `agentic-prompt.css`, `script.js`: site styling and page transitions
+- `activity-health-demo.css`, `activity-health-demo.js`: standalone fake-data dashboard and deterministic browser-side calculations
 - `causal-dag.html`: static GitHub Pages snapshot of the Causal DAG Builder UI
 - `sleep_causal_app/`: copied Flask app used for the full local Causal DAG Builder demo and the static page assets
 - `run_sleep_causal_copy.py`: starts the copied Flask app on `127.0.0.1:5051`
@@ -44,6 +46,7 @@ Open:
 - `http://127.0.0.1:8000/`
 - `http://127.0.0.1:8000/new-projects.html`
 - `http://127.0.0.1:8000/agentic-prompt.html`
+- `http://127.0.0.1:8000/activity-health-demo.html`
 - `http://127.0.0.1:8000/causal-dag.html`
 
 To expose the local site through ngrok:

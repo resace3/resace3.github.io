@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interactive synthetic-data demo of Activity Health Insights by Nick Rezaee.">
+  <title>Activity Health Insights Demo | Nick Rezaee</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="activity-health-demo.css?v=20260719.1">
+</head>
+<body class="health-demo-page">
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary navigation">
+      <div class="brand-group">
+        <a class="brand" href="index.html" aria-label="Nick Rezaee home">Nick Rezaee</a>
+        <a class="new-projects-badge" href="new-projects.html">New Projects</a>
+      </div>
+      <div class="nav-links">
+        <a href="index.html#experience">Experience</a>
+        <a href="index.html#skills">Skills</a>
+        <a href="index.html#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="health-demo-shell" data-health-demo>
+    <section class="demo-disclosure" aria-label="Demo disclosure">
+      <div>
+        <span class="demo-disclosure-dot" aria-hidden="true"></span>
+        <strong>Interactive demo</strong>
+        <span>Synthetic people and virtual step data only</span>
+      </div>
+      <a href="https://github.com/resace3/FPCA_AFT_Health_Addon" target="_blank" rel="noreferrer">View source project</a>
+    </section>
+
+    <section class="health-app" aria-labelledby="health-demo-title">
+      <header class="health-app-header">
+        <span class="health-logo" aria-hidden="true">
+          <svg viewBox="0 0 32 32"><path d="M4 17h5l3-9 5 17 4-13 3 5h4" /></svg>
+        </span>
+        <div class="health-app-heading">
+          <h1 id="health-demo-title">Activity Health Insights</h1>
+          <p>Explore how a fictional activity profile changes a model estimate</p>
+        </div>
+        <span class="demo-ready-status"><i aria-hidden="true"></i> Demo data ready</span>
+      </header>
+
+      <nav class="health-tabs" role="tablist" aria-label="Activity health demo views">
+        <button class="health-tab" id="health-tab-overview" role="tab" aria-controls="health-panel-overview" aria-selected="true" tabindex="0" data-tab="overview">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20h-6v-6h-4v6H4Z" /></svg>
+          <span>Overview</span>
+        </button>
+        <button class="health-tab" id="health-tab-rhythm" role="tab" aria-controls="health-panel-rhythm" aria-selected="false" tabindex="-1" data-tab="rhythm">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h4l2-7 4 13 2-7 2 3h4" /></svg>
+          <span>Activity Rhythm</span>
+        </button>
+        <button class="health-tab" id="health-tab-configuration" role="tab" aria-controls="health-panel-configuration" aria-selected="false" tabindex="-1" data-tab="configuration">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6" /></svg>
+          <span>Configuration</span>
+        </button>
+      </nav>
+
+      <section class="health-panel" id="health-panel-overview" role="tabpanel" aria-labelledby="health-tab-overview" data-panel="overview">
+        <div class="overview-top-grid">
+          <article class="health-card risk-card">
+            <div class="card-title-row">
+              <h2>Estimated 10-year risk of mortality</h2>
+              <button class="icon-button" type="button" aria-label="About this model estimate" data-open-dialog="risk-explainer">i</button>
+            </div>
+            <div class="risk-gauge" role="img" aria-label="Model estimate" data-risk-gauge>
+              <svg viewBox="0 0 220 132" aria-hidden="true">
+                <path class="gauge-track" d="M28 108a82 82 0 0 1 164 0" pathLength="100" />
+                <path class="gauge-value" d="M28 108a82 82 0 0 1 164 0" pathLength="100" data-gauge-value />
+                <line class="gauge-needle" x1="110" y1="108" x2="55" y2="108" data-gauge-needle />
+                <circle cx="110" cy="108" r="6" />
+              </svg>
+              <strong data-risk-value>0.0%</strong>
+              <span data-risk-context>Model estimate</span>
+            </div>
+            <div class="model-range"><span aria-hidden="true">◇</span> Model range: <strong data-model-range>0.0%–0.0%</strong></div>
+            <p class="card-footnote">Educational model simulation, not a diagnosis.</p>
+          </article>
+
+          <article class="health-card weekly-card">
+            <div class="weekly-summary">
+              <span class="metric-icon" aria-hidden="true">↗</span>
+              <div>
+                <p>Weekly Steps</p>
+                <strong data-weekly-steps>0</strong>
+                <span data-weekly-change>Virtual week</span>
+              </div>
+              <button class="secondary-button generate-week-button" type="button" data-generate-week>Generate another virtual week</button>
+            </div>
+            <div class="weekly-chart" role="img" aria-label="Synthetic daily steps for the virtual week" data-weekly-chart></div>
+          </article>
+        </div>
+
+        <article class="health-card survival-card">
+          <div class="card-title-row">
+            <h2>Predicted survival probability</h2>
+            <span class="chart-legend"><i></i> Survival probability</span>
+          </div>
+          <div class="survival-chart" role="img" aria-label="Synthetic predicted survival probability over ten years">
+            <span class="y-label y100">100%</span><span class="y-label y75">75%</span><span class="y-label y50">50%</span><span class="y-label y25">25%</span><span class="y-label y0">0%</span>
+            <svg viewBox="0 0 1000 240" preserveAspectRatio="none" aria-hidden="true">
+              <defs><linearGradient id="survival-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f74ff" stop-opacity=".2"/><stop offset="1" stop-color="#4f74ff" stop-opacity=".02"/></linearGradient></defs>
+              <g class="chart-grid"><line x1="0" y1="0" x2="1000" y2="0"/><line x1="0" y1="60" x2="1000" y2="60"/><line x1="0" y1="120" x2="1000" y2="120"/><line x1="0" y1="180" x2="1000" y2="180"/><line x1="0" y1="239" x2="1000" y2="239"/></g>
+              <path class="survival-area" data-survival-area />
+              <path class="survival-line" data-survival-line />
+            </svg>
+            <div class="x-axis"><span>0</span><span>2</span><span>4</span><span>6</span><span>8</span><span>10 years</span></div>
+          </div>
+        </article>
+
+        <div class="overview-bottom-grid">
+          <article class="health-card change-card">
+            <div class="insight-heading"><span class="insight-icon green" aria-hidden="true">↗</span><div><h2>What changed this week</h2><p data-change-summary>Loading virtual comparison…</p></div></div>
+            <div class="sparkline" role="img" aria-label="Virtual daily step trend"><svg viewBox="0 0 620 110" preserveAspectRatio="none"><path data-spark-area /><path data-spark-line /><g data-spark-points></g></svg></div>
+          </article>
+          <article class="health-card meaning-card">
+            <h2>What this means</h2>
+            <div class="meaning-row"><span class="insight-icon green" aria-hidden="true">↗</span><p><strong>Your strongest pattern</strong><span data-strongest-pattern>Loading…</span></p></div>
+            <div class="meaning-row"><span class="insight-icon amber" aria-hidden="true">☀</span><p><strong>One useful opportunity</strong><span data-opportunity>Loading…</span></p></div>
+            <div class="meaning-row"><span class="insight-icon blue" aria-hidden="true">∿</span><p><strong>How to read the estimate</strong><span>Change the fictional profile and focus on how the trend responds.</span></p></div>
+          </article>
+        </div>
+
+        <aside class="health-note">Estimates combine synthetic activity with a simplified educational risk model. All names, entities, and values on this page are fictional.</aside>
+      </section>
+
+      <section class="health-panel" id="health-panel-rhythm" role="tabpanel" aria-labelledby="health-tab-rhythm" data-panel="rhythm" hidden>
+        <div class="rhythm-grid">
+          <article class="health-card hourly-card">
+            <div class="card-title-row">
+              <div><h2>Average hourly steps</h2><p class="card-subtitle" data-hourly-copy>Virtual seven-day average</p></div>
+              <button class="icon-button" type="button" aria-label="About average hourly steps" data-open-dialog="rhythm-explainer">i</button>
+            </div>
+            <div class="hourly-chart" role="img" aria-label="Synthetic average hourly steps" data-hourly-chart></div>
+            <div class="hour-axis"><span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>12 AM</span></div>
+          </article>
+          <article class="health-card active-window-card">
+            <span class="clock-icon" aria-hidden="true">◷</span>
+            <div><h2>Most active window</h2><strong data-active-window>Loading…</strong><p>Your highest synthetic four-hour window</p></div>
+          </article>
+        </div>
+        <aside class="health-info-banner"><span aria-hidden="true">i</span><p data-rhythm-note>Regular activity throughout a virtual day supports a more balanced pattern.</p></aside>
+      </section>
+
+      <section class="health-panel" id="health-panel-configuration" role="tabpanel" aria-labelledby="health-tab-configuration" data-panel="configuration" hidden>
+        <article class="health-card configuration-intro">
+          <div><h2>Configure the fictional profile</h2><p>Nothing is sent or stored. Saving only recalculates this browser demo.</p></div>
+          <span class="profile-status" role="status" aria-live="polite" data-profile-status></span>
+        </article>
+
+        <form class="profile-form" data-profile-form>
+          <fieldset class="health-card">
+            <legend>Virtual activity data</legend>
+            <div class="form-grid two-columns">
+              <label><span>Step pattern</span><select name="step_profile" data-profile-input>
+                <option value="steady">Steady daytime walker</option>
+                <option value="weekend">Weekend explorer</option>
+                <option value="evening">Evening mover</option>
+              </select></label>
+              <label><span>Display timezone</span><select name="timezone" data-profile-input>
+                <option value="America/New_York">America/New_York</option>
+                <option value="America/Los_Angeles">America/Los_Angeles</option>
+                <option value="Europe/London">Europe/London</option>
+              </select></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="health-card">
+            <legend>About the fictional person</legend>
+            <div class="form-grid three-columns">
+              <label><span>Age</span><input name="age" type="number" min="18" max="90" step="1" value="42" required data-profile-input></label>
+              <label><span>Sex</span><select name="sex" data-profile-input><option value="female">Female</option><option value="male">Male</option></select></label>
+              <label><span>BMI</span><input name="bmi" type="number" min="15" max="50" step="0.1" value="24.6" required data-profile-input></label>
+              <label class="span-two"><span>Race / ethnicity</span><select name="race" data-profile-input><option>Fictional multiracial profile</option><option>Fictional White profile</option><option>Fictional Black profile</option><option>Fictional Asian profile</option></select></label>
+              <label><span>Self-rated health</span><select name="self_health" data-profile-input><option value="excellent">Excellent</option><option value="very_good" selected>Very good</option><option value="good">Good</option><option value="fair">Fair</option><option value="poor">Poor</option></select></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="health-card">
+            <legend>Fictional health history</legend>
+            <div class="form-grid two-columns">
+              <label><span>Smoking status</span><select name="smoking" data-profile-input><option value="never">Never</option><option value="former">Former</option><option value="current">Current</option></select></label>
+              <label><span>Alcohol use</span><select name="alcohol" data-profile-input><option value="no">No</option><option value="yes">Yes</option></select></label>
+              <label><span>Hypertension</span><select name="hypertension" data-profile-input><option value="no">No</option><option value="yes">Yes</option></select></label>
+              <label><span>Diabetes</span><select name="diabetes" data-profile-input><option value="no">No</option><option value="yes">Yes</option></select></label>
+              <label><span>Heart attack</span><select name="heart_attack" data-profile-input><option value="no">No</option><option value="yes">Yes</option></select></label>
+              <label><span>Stroke</span><select name="stroke" data-profile-input><option value="no">No</option><option value="yes">Yes</option></select></label>
+              <label><span>Cancer</span><select name="cancer" data-profile-input><option value="no">No</option><option value="yes">Yes</option></select></label>
+            </div>
+          </fieldset>
+
+          <div class="profile-actions">
+            <button class="primary-button" type="submit">Save and recalculate demo</button>
+            <button class="secondary-button" type="button" data-reset-demo>Reset fictional profile</button>
+            <p>All calculations happen locally in this page.</p>
+          </div>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <dialog class="health-dialog" id="risk-explainer">
+    <button type="button" class="dialog-close" aria-label="Close model explanation" data-close-dialog>×</button>
+    <h2>What is this estimate?</h2>
+    <p>A transparent teaching simulation combines age, BMI, selected fictional health history, and virtual step volume. It is not the research model and cannot estimate a real person's health.</p>
+  </dialog>
+  <dialog class="health-dialog" id="rhythm-explainer">
+    <button type="button" class="dialog-close" aria-label="Close activity explanation" data-close-dialog>×</button>
+    <h2>How is the rhythm built?</h2>
+    <p>Each selectable virtual profile has a synthetic 24-hour curve. Generating a new week adds deterministic variation so the demo remains reproducible.</p>
+  </dialog>
+
+  <script src="script.js"></script>
+  <script src="activity-health-demo.js?v=20260719.1"></script>
+</body>
+</html>

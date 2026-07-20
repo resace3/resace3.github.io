@@ -9,6 +9,7 @@ STATIC_PAGES = [
     ROOT / "new-projects.html",
     ROOT / "causal-dag.html",
     ROOT / "agentic-prompt.html",
+    ROOT / "activity-health-demo.html",
 ]
 
 
@@ -63,6 +64,16 @@ def test_static_pages_reference_existing_internal_links():
             if resolved is None:
                 continue
             assert resolved.exists(), f"{page.name} links to missing page {link}"
+
+
+def test_activity_health_demo_has_synthetic_data_disclosure_and_local_assets():
+    html = (ROOT / "activity-health-demo.html").read_text(encoding="utf-8")
+
+    assert "Synthetic people and virtual step data only" in html
+    assert "Nothing is sent or stored" in html
+    assert 'src="activity-health-demo.js?v=20260719.1"' in html
+    assert 'href="activity-health-demo.css?v=20260719.1"' in html
+    assert "Day comparison" not in html
 
 
 def test_static_causal_dag_snapshot_intercepts_backend_histogram_calls():

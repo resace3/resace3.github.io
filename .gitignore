@@ -1,4 +1,5 @@
 node_modules/
+.venv-test/
 playwright-report/
 test-results/
 .pytest_cache/

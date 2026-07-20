@@ -107,12 +107,76 @@ test("home page renders the personal site", async ({ page }) => {
   await expect(page.getByRole("link", { name: "New Projects" }).first()).toBeVisible();
 });
 
-test("new projects page links to both app concepts", async ({ page }) => {
+test("new projects page links to all interactive app concepts", async ({ page }) => {
   await page.goto("/new-projects.html");
 
   await expect(page.getByRole("heading", { name: "Open Source Health Apps" })).toBeVisible();
   await expect(page.getByRole("link", { name: /Causal DAG Builder/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /Agentic Prompt App/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Activity Health Insights/ })).toBeVisible();
+});
+
+test("activity health demo recalculates every view from fictional configuration", async ({ page }) => {
+  await page.goto("/activity-health-demo.html");
+
+  await expect(page.getByText("Synthetic people and virtual step data only")).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Overview" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator("[data-weekly-chart] .weekly-bar")).toHaveCount(7);
+
+  const initial = await page.evaluate(() => window.__activityHealthDemoState());
+  expect(initial.profile.step_profile).toBe("steady");
+  expect(initial.daily).toHaveLength(7);
+  expect(initial.hourly).toHaveLength(24);
+  expect(initial.risk).toBeGreaterThan(0);
+
+  await page.getByRole("button", { name: "About this model estimate" }).click();
+  await expect(page.getByRole("dialog").getByRole("heading", { name: "What is this estimate?" })).toBeVisible();
+  await page.getByRole("button", { name: "Close model explanation" }).click();
+
+  await page.getByRole("tab", { name: "Configuration" }).click();
+  await page.locator('[name="step_profile"]').selectOption("evening");
+  await page.locator('[name="timezone"]').selectOption("Europe/London");
+  await page.locator('[name="age"]').fill("68");
+  await page.locator('[name="bmi"]').fill("32");
+  await page.locator('[name="sex"]').selectOption("male");
+  await page.locator('[name="smoking"]').selectOption("current");
+  await page.locator('[name="hypertension"]').selectOption("yes");
+  await page.locator('[name="diabetes"]').selectOption("yes");
+  await page.locator('[name="self_health"]').selectOption("fair");
+  await page.getByRole("button", { name: "Save and recalculate demo" }).click();
+  await expect(page.getByText("Demo recalculated.")).toBeVisible();
+
+  const configured = await page.evaluate(() => window.__activityHealthDemoState());
+  expect(configured.risk).toBeGreaterThan(initial.risk);
+  expect(configured.weeklyTotal).not.toBe(initial.weeklyTotal);
+  expect(configured.profile.timezone).toBe("Europe/London");
+
+  await page.getByRole("tab", { name: "Overview" }).click();
+  await expect(page.locator("[data-risk-value]")).toHaveText(`${configured.risk.toFixed(1)}%`);
+  await expect(page.locator("[data-weekly-steps]")).toHaveText(configured.weeklyTotal.toLocaleString());
+
+  await page.getByRole("button", { name: "Generate another virtual week" }).click();
+  const regenerated = await page.evaluate(() => window.__activityHealthDemoState());
+  expect(regenerated.weekVariant).toBe(1);
+  expect(regenerated.weeklyTotal).not.toBe(configured.weeklyTotal);
+
+  await page.getByRole("tab", { name: "Activity Rhythm" }).click();
+  await expect(page.locator("[data-hourly-chart] .hourly-bar")).toHaveCount(24);
+  await expect(page.locator("[data-hourly-copy]")).toContainText("Europe/London");
+  await expect(page.locator("[data-active-window]")).not.toHaveText("Loading…");
+  await page.getByRole("button", { name: "About average hourly steps" }).click();
+  await expect(page.getByRole("dialog").getByRole("heading", { name: "How is the rhythm built?" })).toBeVisible();
+  await page.getByRole("button", { name: "Close activity explanation" }).click();
+
+  await page.getByRole("tab", { name: "Activity Rhythm" }).press("End");
+  await expect(page.getByRole("tab", { name: "Configuration" })).toHaveAttribute("aria-selected", "true");
+  await page.getByRole("button", { name: "Reset fictional profile" }).click();
+  await expect(page.getByText("Fictional defaults restored.")).toBeVisible();
+  const reset = await page.evaluate(() => window.__activityHealthDemoState());
+  expect(reset.profile.age).toBe(42);
+  expect(reset.profile.step_profile).toBe("steady");
+  expect(reset.weekVariant).toBe(0);
+  expect(reset.risk).toBeCloseTo(initial.risk, 8);
 });
 
 test("agentic prompt page renders the static prompt animation", async ({ page }) => {
