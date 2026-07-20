@@ -76,6 +76,22 @@ def test_activity_health_demo_has_synthetic_data_disclosure_and_local_assets():
     assert "Day comparison" not in html
 
 
+def test_new_projects_decorations_and_mobile_header_stay_in_viewport():
+    html = (ROOT / "new-projects.html").read_text(encoding="utf-8")
+    css = (ROOT / "style.css").read_text(encoding="utf-8")
+
+    assert 'href="style.css?v=20260720.2"' in html
+
+    orb_rule = css.split(".new-projects-hero::before {", 1)[1].split("}", 1)[0]
+    assert "right: 0;" in orb_rule
+
+    mobile_rules = css.split("@media (max-width: 680px) {", 1)[1]
+    assert "grid-template-columns: 1fr;" in mobile_rules
+    assert "grid-template-columns: repeat(3, minmax(0, 1fr));" in mobile_rules
+    assert ".brand-group" in mobile_rules
+    assert ".new-projects-badge" in mobile_rules
+
+
 def test_static_causal_dag_snapshot_intercepts_backend_histogram_calls():
     html = (ROOT / "causal-dag.html").read_text(encoding="utf-8")
 

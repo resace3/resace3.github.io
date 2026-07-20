@@ -694,7 +694,7 @@ h3 {
 .new-projects-hero::before {
   position: absolute;
   top: 62px;
-  right: -58px;
+  right: 0;
   width: 280px;
   height: 280px;
   border: 1px solid rgba(37, 99, 235, 0.12);
@@ -1727,14 +1727,45 @@ h3 {
 
 @media (max-width: 680px) {
   .nav {
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
     gap: 12px;
+    padding: 14px 0;
+  }
+
+  .brand-group {
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .brand {
+    font-size: 1.3rem;
+  }
+
+  .brand::before {
+    width: 8px;
+    height: 8px;
+  }
+
+  .new-projects-badge {
+    min-height: 38px;
+    padding: 7px 12px;
+    font-size: 0.85rem;
   }
 
   .nav-links {
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 10px 16px;
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .nav-links a {
+    min-height: 36px;
+    padding: 7px 5px;
+    font-size: 0.72rem;
   }
 
   .hero,
