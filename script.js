@@ -39,10 +39,21 @@ document.querySelectorAll(".project-card").forEach((card) => {
 });
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+let transitionNavigationTimer = 0;
 
-window.addEventListener("pageshow", () => {
+function resetPageTransition() {
+  if (transitionNavigationTimer) {
+    window.clearTimeout(transitionNavigationTimer);
+    transitionNavigationTimer = 0;
+  }
+
   document.body.classList.remove("page-transition-out");
-});
+  document.querySelectorAll(".page-transition-veil, .project-card-transition-clone").forEach((element) => element.remove());
+  document.querySelectorAll(".new-project-card.is-card-leaving").forEach((card) => card.classList.remove("is-card-leaving"));
+}
+
+window.addEventListener("pagehide", resetPageTransition);
+window.addEventListener("pageshow", resetPageTransition);
 
 document.querySelectorAll("a[href]").forEach((link) => {
   link.addEventListener("click", (event) => {
@@ -67,6 +78,11 @@ document.querySelectorAll("a[href]").forEach((link) => {
       url.hash;
 
     if (!isSameOrigin || isHashOnly || !["http:", "https:"].includes(url.protocol)) {
+      return;
+    }
+
+    if (document.body.classList.contains("page-transition-out")) {
+      event.preventDefault();
       return;
     }
 
@@ -105,7 +121,8 @@ document.querySelectorAll("a[href]").forEach((link) => {
     }
 
     document.body.classList.add("page-transition-out");
-    window.setTimeout(() => {
+    transitionNavigationTimer = window.setTimeout(() => {
+      transitionNavigationTimer = 0;
       window.location.href = url.href;
     }, isProjectCard ? 430 : 260);
   });

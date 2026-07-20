@@ -116,6 +116,25 @@ test("new projects page links to all interactive app concepts", async ({ page })
   await expect(page.getByRole("link", { name: /Activity Health Insights/ })).toBeVisible();
 });
 
+test("project history navigation restores a clean New Projects page", async ({ page }) => {
+  await page.goto("/new-projects.html");
+
+  await page.getByRole("link", { name: "Try the Activity Health Insights interactive demo" }).click();
+  await page.waitForURL(/activity-health-demo\.html$/);
+  await page.goBack();
+  await expect(page.getByRole("heading", { name: "Open Source Health Apps" })).toBeVisible();
+  await expect(page.locator(".page-transition-veil")).toHaveCount(0);
+  await expect(page.locator(".project-card-transition-clone")).toHaveCount(0);
+  await expect(page.locator(".new-project-card.is-card-leaving")).toHaveCount(0);
+  await expect(page.locator(".new-project-card")).toHaveCount(3);
+
+  await page.goForward();
+  await expect(page.getByRole("heading", { name: "Activity Health Insights" })).toBeVisible();
+  await page.goBack();
+  await expect(page.getByRole("heading", { name: "Open Source Health Apps" })).toBeVisible();
+  await expect(page.locator(".page-transition-veil, .project-card-transition-clone, .is-card-leaving")).toHaveCount(0);
+});
+
 test("activity health demo recalculates every view from fictional configuration", async ({ page }) => {
   await page.goto("/activity-health-demo.html");
 

@@ -118,6 +118,23 @@ def test_activity_health_project_card_needle_matches_displayed_risk():
     assert "transform-origin: left center;" in needle_rule
 
 
+def test_page_transition_state_is_cleared_for_history_restores():
+    script = (ROOT / "script.js").read_text(encoding="utf-8")
+
+    assert "function resetPageTransition()" in script
+    assert 'window.addEventListener("pagehide", resetPageTransition);' in script
+    assert 'window.addEventListener("pageshow", resetPageTransition);' in script
+    assert 'document.body.classList.remove("page-transition-out");' in script
+    assert 'document.querySelectorAll(".page-transition-veil, .project-card-transition-clone")' in script
+    assert 'document.querySelectorAll(".new-project-card.is-card-leaving")' in script
+    assert "window.clearTimeout(transitionNavigationTimer);" in script
+    assert 'document.body.classList.contains("page-transition-out")' in script
+
+    for page_name in ["index.html", "new-projects.html", "agentic-prompt.html", "activity-health-demo.html"]:
+        html = (ROOT / page_name).read_text(encoding="utf-8")
+        assert 'src="script.js?v=20260720.1"' in html
+
+
 def test_static_causal_dag_snapshot_intercepts_backend_histogram_calls():
     html = (ROOT / "causal-dag.html").read_text(encoding="utf-8")
 
