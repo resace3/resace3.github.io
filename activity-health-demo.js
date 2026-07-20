@@ -134,6 +134,93 @@
     }));
   }
 
+  function solveLinearSystem(matrix, values) {
+    const size = values.length;
+    const rows = matrix.map((row, index) => [...row, values[index]]);
+
+    for (let column = 0; column < size; column += 1) {
+      let pivotRow = column;
+      for (let row = column + 1; row < size; row += 1) {
+        if (Math.abs(rows[row][column]) > Math.abs(rows[pivotRow][column])) pivotRow = row;
+      }
+      [rows[column], rows[pivotRow]] = [rows[pivotRow], rows[column]];
+
+      const pivot = rows[column][column];
+      if (Math.abs(pivot) < 1e-10) return Array(size).fill(0);
+      for (let index = column; index <= size; index += 1) rows[column][index] /= pivot;
+
+      for (let row = 0; row < size; row += 1) {
+        if (row === column) continue;
+        const factor = rows[row][column];
+        for (let index = column; index <= size; index += 1) rows[row][index] -= factor * rows[column][index];
+      }
+    }
+
+    return rows.map((row) => row[size]);
+  }
+
+  function fitFourierSeries(values, harmonics = 3) {
+    const basisAt = (hour) => {
+      const basis = [1];
+      for (let harmonic = 1; harmonic <= harmonics; harmonic += 1) {
+        const angle = 2 * Math.PI * harmonic * hour / 24;
+        basis.push(Math.cos(angle), Math.sin(angle));
+      }
+      return basis;
+    };
+
+    const design = values.map((_value, hour) => basisAt(hour));
+    const terms = design[0].length;
+    const normalMatrix = Array.from({ length: terms }, () => Array(terms).fill(0));
+    const normalValues = Array(terms).fill(0);
+    design.forEach((row, hour) => {
+      row.forEach((left, leftIndex) => {
+        normalValues[leftIndex] += left * values[hour];
+        row.forEach((right, rightIndex) => { normalMatrix[leftIndex][rightIndex] += left * right; });
+      });
+    });
+
+    const coefficients = solveLinearSystem(normalMatrix, normalValues);
+    const predict = (hour) => basisAt(hour).reduce((sum, value, index) => sum + value * coefficients[index], 0);
+    const fitted = values.map((_value, hour) => predict(hour));
+    const mean = total(values) / values.length;
+    const residualSum = values.reduce((sum, value, index) => sum + (value - fitted[index]) ** 2, 0);
+    const totalSum = values.reduce((sum, value) => sum + (value - mean) ** 2, 0);
+    const rSquared = totalSum ? 1 - residualSum / totalSum : 1;
+    const samples = Array.from({ length: 193 }, (_value, index) => {
+      const hour = index * 24 / 192;
+      return { hour, value: predict(hour) };
+    });
+    return { harmonics, coefficients, fitted, rSquared, samples };
+  }
+
+  function renderFourier(hourly) {
+    const fit = fitFourierSeries(hourly, 3);
+    const chart = byData("fourier-chart");
+    const plot = { left: 24, right: 988, top: 24, bottom: 228 };
+    const maximum = Math.max(1, ...hourly, ...fit.samples.map((sample) => sample.value)) * 1.08;
+    const x = (hour) => plot.left + hour / 24 * (plot.right - plot.left);
+    const y = (value) => plot.bottom - Math.max(0, value) / maximum * (plot.bottom - plot.top);
+    const line = fit.samples.map((sample, index) => `${index ? "L" : "M"}${x(sample.hour).toFixed(1)},${y(sample.value).toFixed(1)}`).join(" ");
+
+    byData("fourier-line").setAttribute("d", line);
+    byData("fourier-area").setAttribute("d", `${line} L${plot.right},${plot.bottom} L${plot.left},${plot.bottom} Z`);
+    byData("fourier-points").replaceChildren(...hourly.map((value, hour) => {
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", x(hour).toFixed(1));
+      circle.setAttribute("cy", y(value).toFixed(1));
+      circle.setAttribute("r", "5");
+      circle.setAttribute("aria-label", `${formatHour(hour)} observed ${value.toLocaleString()} steps`);
+      return circle;
+    }));
+
+    const peak = fit.samples.reduce((best, sample) => sample.value > best.value ? sample : best, fit.samples[0]);
+    byData("fourier-score").textContent = `3 harmonics · R² ${Math.max(0, fit.rSquared).toFixed(2)}`;
+    byData("fourier-peak").textContent = `Around ${formatHour(Math.round(peak.hour) % 24)}`;
+    chart.setAttribute("aria-label", `Three-harmonic Fourier series fit with R squared ${Math.max(0, fit.rSquared).toFixed(2)}, peaking around ${formatHour(Math.round(peak.hour) % 24)}`);
+    return { harmonics: fit.harmonics, coefficients: [...fit.coefficients], rSquared: fit.rSquared, peakHour: peak.hour };
+  }
+
   function pointsFor(values, width, height, padding = 4) {
     const min = Math.min(...values);
     const max = Math.max(...values);
@@ -215,10 +302,11 @@
 
     renderWeekly(activity.daily);
     renderHourly(activity.hourly);
+    const fourier = renderFourier(activity.hourly);
     renderSparkline(activity.daily);
     renderSurvival(risk);
 
-    lastRendered = { profile: { ...profile }, weekVariant, weeklyTotal, priorTotal, weeklyChange, risk, activeWindow: { ...activityWindow }, opportunity, daily: [...activity.daily], hourly: [...activity.hourly] };
+    lastRendered = { profile: { ...profile }, weekVariant, weeklyTotal, priorTotal, weeklyChange, risk, activeWindow: { ...activityWindow }, opportunity, fourier, daily: [...activity.daily], hourly: [...activity.hourly] };
     window.__activityHealthDemoState = () => JSON.parse(JSON.stringify(lastRendered));
   }
 

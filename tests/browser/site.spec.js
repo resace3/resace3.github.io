@@ -184,6 +184,13 @@ test("activity health demo recalculates every view from fictional configuration"
   await expect(page.locator("[data-hourly-chart] .hourly-bar")).toHaveCount(24);
   await expect(page.locator("[data-hourly-copy]")).toContainText("Europe/London");
   await expect(page.locator("[data-active-window]")).not.toHaveText("Loading…");
+  await expect(page.locator("[data-fourier-points] circle")).toHaveCount(24);
+  await expect(page.locator("[data-fourier-score]")).toContainText("3 harmonics · R²");
+  const fourierPath = await page.locator("[data-fourier-line]").getAttribute("d");
+  expect(fourierPath.length).toBeGreaterThan(1000);
+  expect(regenerated.fourier.harmonics).toBe(3);
+  expect(regenerated.fourier.rSquared).toBeGreaterThan(0);
+  expect(regenerated.fourier.rSquared).toBeLessThanOrEqual(1);
   await page.getByRole("button", { name: "About average hourly steps" }).click();
   await expect(page.getByRole("dialog").getByRole("heading", { name: "How is the rhythm built?" })).toBeVisible();
   await page.getByRole("button", { name: "Close activity explanation" }).click();
