@@ -10,18 +10,6 @@
       prior: [11600, 13200, 12400, 13900, 12900, 10900, 11600],
       hourly: [20, 12, 8, 8, 18, 42, 120, 360, 820, 1180, 1510, 1420, 1190, 1030, 790, 680, 590, 510, 430, 330, 240, 160, 80, 32],
     },
-    weekend: {
-      label: "Weekend explorer",
-      daily: [8200, 8800, 9100, 8700, 9500, 16200, 18400],
-      prior: [8500, 8100, 9000, 8600, 9200, 14100, 15700],
-      hourly: [18, 10, 8, 8, 12, 28, 62, 140, 320, 610, 980, 1320, 1510, 1380, 1160, 920, 700, 520, 400, 300, 210, 130, 72, 30],
-    },
-    evening: {
-      label: "Evening mover",
-      daily: [9300, 10100, 9700, 10600, 11300, 8400, 7900],
-      prior: [9900, 10300, 10100, 10800, 11000, 9000, 8500],
-      hourly: [12, 8, 6, 6, 10, 20, 48, 100, 190, 260, 340, 410, 460, 520, 610, 720, 960, 1260, 1510, 1420, 1180, 810, 360, 90],
-    },
   };
   const weekNoise = [
     [0, 0, 0, 0, 0, 0, 0],
@@ -207,8 +195,9 @@
     const riskContext = risk < 2 ? "Lower simulated range" : risk < 5 ? "Middle simulated range" : "Higher simulated range";
     byData("risk-context").textContent = riskContext;
     byData("model-range").textContent = `${Math.max(0.2, risk * 0.78).toFixed(1)}%–${Math.min(25, risk * 1.34).toFixed(1)}%`;
-    byData("gauge-value").style.strokeDasharray = `${Math.min(100, risk * 5)} 100`;
-    byData("gauge-needle").style.transform = `rotate(${-90 + Math.min(100, risk * 5) * 1.8}deg)`;
+    const gaugeSweep = Math.min(100, risk * 5);
+    byData("gauge-value").style.strokeDasharray = `${gaugeSweep} 100`;
+    byData("gauge-needle").style.transform = `rotate(${gaugeSweep * 1.8}deg)`;
     byData("risk-gauge").setAttribute("aria-label", `Synthetic 10-year model estimate ${risk.toFixed(1)} percent, ${riskContext.toLowerCase()}`);
     byData("active-window").textContent = `${formatHour(window.start)} – ${formatHour(window.end)}`;
     byData("hourly-copy").textContent = `Virtual seven-day average · ${profile.timezone}`;

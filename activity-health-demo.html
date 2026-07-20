@@ -158,8 +158,6 @@
             <div class="form-grid two-columns">
               <label><span>Step pattern</span><select name="step_profile" data-profile-input>
                 <option value="steady">Steady daytime walker</option>
-                <option value="weekend">Weekend explorer</option>
-                <option value="evening">Evening mover</option>
               </select></label>
               <label><span>Display timezone</span><select name="timezone" data-profile-input>
                 <option value="America/New_York">America/New_York</option>
@@ -211,10 +209,10 @@
   <dialog class="health-dialog" id="rhythm-explainer">
     <button type="button" class="dialog-close" aria-label="Close activity explanation" data-close-dialog>×</button>
     <h2>How is the rhythm built?</h2>
-    <p>Each selectable virtual profile has a synthetic 24-hour curve. Generating a new week adds deterministic variation so the demo remains reproducible.</p>
+    <p>The virtual profile has a synthetic 24-hour curve. Generating a new week adds deterministic variation so the demo remains reproducible.</p>
   </dialog>
 
   <script src="script.js"></script>
-  <script src="activity-health-demo.js?v=20260719.1"></script>
+  <script src="activity-health-demo.js?v=20260720.2"></script>
 </body>
 </html>

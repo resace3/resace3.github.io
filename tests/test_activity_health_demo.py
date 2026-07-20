@@ -62,11 +62,20 @@ def test_demo_configuration_drives_activity_and_risk_calculations():
 
 def test_demo_has_complete_deterministic_chart_inputs():
     assert 'const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]' in SCRIPT
-    assert len(re.findall(r"^\s{6}daily: \[", SCRIPT, flags=re.M)) == 3
-    assert len(re.findall(r"^\s{6}prior: \[", SCRIPT, flags=re.M)) == 3
-    assert len(re.findall(r"^\s{6}hourly: \[", SCRIPT, flags=re.M)) == 3
+    assert len(re.findall(r"^\s{6}daily: \[", SCRIPT, flags=re.M)) == 1
+    assert len(re.findall(r"^\s{6}prior: \[", SCRIPT, flags=re.M)) == 1
+    assert len(re.findall(r"^\s{6}hourly: \[", SCRIPT, flags=re.M)) == 1
     assert "weekNoise" in SCRIPT
     assert "Math.random" not in SCRIPT
+
+
+def test_demo_offers_one_step_pattern_and_maps_low_risk_to_left_side_of_gauge():
+    assert HTML.count('<option value="steady">Steady daytime walker</option>') == 1
+    assert "Weekend explorer" not in HTML + SCRIPT
+    assert "Evening mover" not in HTML + SCRIPT
+    assert "const gaugeSweep = Math.min(100, risk * 5);" in SCRIPT
+    assert "rotate(${gaugeSweep * 1.8}deg)" in SCRIPT
+    assert "-90 +" not in SCRIPT
 
 
 def test_removed_day_comparison_is_not_reintroduced():

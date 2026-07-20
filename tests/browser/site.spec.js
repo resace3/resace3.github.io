@@ -134,7 +134,8 @@ test("activity health demo recalculates every view from fictional configuration"
   await page.getByRole("button", { name: "Close model explanation" }).click();
 
   await page.getByRole("tab", { name: "Configuration" }).click();
-  await page.locator('[name="step_profile"]').selectOption("evening");
+  await expect(page.locator('[name="step_profile"] option')).toHaveCount(1);
+  await expect(page.locator('[name="step_profile"]')).toHaveValue("steady");
   await page.locator('[name="timezone"]').selectOption("Europe/London");
   await page.locator('[name="age"]').fill("68");
   await page.locator('[name="bmi"]').fill("32");
