@@ -184,7 +184,7 @@
     const priorTotal = total(activity.prior);
     const weeklyChange = (weeklyTotal - priorTotal) / priorTotal * 100;
     const risk = calculateRisk(weeklyTotal / 7);
-    const window = activeWindow(activity.hourly);
+    const activityWindow = activeWindow(activity.hourly);
     const opportunity = periodOpportunity(activity.hourly);
 
     byData("weekly-steps").textContent = weeklyTotal.toLocaleString();
@@ -199,9 +199,9 @@
     byData("gauge-value").style.strokeDasharray = `${gaugeSweep} 100`;
     byData("gauge-needle").style.transform = `rotate(${gaugeSweep * 1.8}deg)`;
     byData("risk-gauge").setAttribute("aria-label", `Synthetic 10-year model estimate ${risk.toFixed(1)} percent, ${riskContext.toLowerCase()}`);
-    byData("active-window").textContent = `${formatHour(window.start)} – ${formatHour(window.end)}`;
+    byData("active-window").textContent = `${formatHour(activityWindow.start)} – ${formatHour(activityWindow.end)}`;
     byData("hourly-copy").textContent = `Virtual seven-day average · ${profile.timezone}`;
-    byData("strongest-pattern").textContent = `This profile moves most during ${formatHour(window.start)} – ${formatHour(window.end)}.`;
+    byData("strongest-pattern").textContent = `This profile moves most during ${formatHour(activityWindow.start)} – ${formatHour(activityWindow.end)}.`;
     const opportunityCopy = {
       morning: "A short virtual morning walk would make this pattern more balanced.",
       afternoon: "A short virtual afternoon walk would make this pattern more balanced.",
@@ -218,7 +218,7 @@
     renderSparkline(activity.daily);
     renderSurvival(risk);
 
-    lastRendered = { profile: { ...profile }, weekVariant, weeklyTotal, priorTotal, weeklyChange, risk, activeWindow: { ...window }, opportunity, daily: [...activity.daily], hourly: [...activity.hourly] };
+    lastRendered = { profile: { ...profile }, weekVariant, weeklyTotal, priorTotal, weeklyChange, risk, activeWindow: { ...activityWindow }, opportunity, daily: [...activity.daily], hourly: [...activity.hourly] };
     window.__activityHealthDemoState = () => JSON.parse(JSON.stringify(lastRendered));
   }
 
