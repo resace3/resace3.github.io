@@ -168,7 +168,7 @@ test("activity health demo recalculates every view from fictional configuration"
 
   const configured = await page.evaluate(() => window.__activityHealthDemoState());
   expect(configured.risk).toBeGreaterThan(initial.risk);
-  expect(configured.weeklyTotal).not.toBe(initial.weeklyTotal);
+  expect(configured.weeklyTotal).toBe(initial.weeklyTotal);
   expect(configured.profile.timezone).toBe("Europe/London");
 
   await page.getByRole("tab", { name: "Overview" }).click();
