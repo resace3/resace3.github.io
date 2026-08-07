@@ -110,10 +110,11 @@ test("home page renders the personal site", async ({ page }) => {
 test("new projects page links to all interactive app concepts", async ({ page }) => {
   await page.goto("/new-projects.html");
 
-  await expect(page.getByRole("heading", { name: "Open Source Health Apps" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Open Source Apps" })).toBeVisible();
   await expect(page.getByRole("link", { name: /Causal DAG Builder/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /Agentic Prompt App/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /Activity Health Insights/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Business Simulation Cases/ })).toBeVisible();
 });
 
 test("project history navigation restores a clean New Projects page", async ({ page }) => {
@@ -122,17 +123,54 @@ test("project history navigation restores a clean New Projects page", async ({ p
   await page.getByRole("link", { name: "Try the Activity Health Insights interactive demo" }).click();
   await page.waitForURL(/activity-health-demo\.html$/);
   await page.goBack();
-  await expect(page.getByRole("heading", { name: "Open Source Health Apps" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Open Source Apps" })).toBeVisible();
   await expect(page.locator(".page-transition-veil")).toHaveCount(0);
   await expect(page.locator(".project-card-transition-clone")).toHaveCount(0);
   await expect(page.locator(".new-project-card.is-card-leaving")).toHaveCount(0);
-  await expect(page.locator(".new-project-card")).toHaveCount(3);
+  await expect(page.locator(".new-project-card")).toHaveCount(4);
 
   await page.goForward();
   await expect(page.getByRole("heading", { name: "Activity Health Insights" })).toBeVisible();
   await page.goBack();
-  await expect(page.getByRole("heading", { name: "Open Source Health Apps" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Open Source Apps" })).toBeVisible();
   await expect(page.locator(".page-transition-veil, .project-card-transition-clone, .is-card-leaving")).toHaveCount(0);
+});
+
+test("business simulation cases explorer runs every case in the browser", async ({ page }) => {
+  await page.goto("/business-simulation-cases.html");
+
+  await expect(page.getByRole("heading", { name: "Business Simulation Cases" })).toBeVisible();
+  await expect(page.locator("[data-case]")).toHaveCount(18);
+  await expect(page.locator(".sim-metric")).toHaveCount(4);
+  await expect(page.locator(".sim-chart svg").first()).toBeVisible();
+
+  // Every case must simulate without throwing and without degenerate output.
+  const report = await page.evaluate(() => {
+    const bad = [];
+    for (const id of window.simulationCases.ids) {
+      window.simulationCases.select(id);
+      const values = [...document.querySelectorAll(".sim-metric-value")].map((n) => n.textContent);
+      if (values.length !== 4) bad.push(`${id}: expected 4 metrics, got ${values.length}`);
+      if (values.some((v) => /NaN|Infinity|undefined/.test(v))) bad.push(`${id}: ${values.join(" | ")}`);
+      if (!document.querySelector(".sim-chart svg")) bad.push(`${id}: no chart rendered`);
+    }
+    return bad;
+  });
+  expect(report).toEqual([]);
+
+  // Moving a control re-runs the simulation and changes the reported metrics.
+  await page.evaluate(() => window.simulationCases.select("ch4"));
+  const before = await page.locator(".sim-metric-value").nth(2).textContent();
+  const slider = page.locator('input[data-control="lift"]');
+  await slider.evaluate((el) => {
+    el.value = el.max;
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await expect(page.locator(".sim-metric-value").nth(2)).not.toHaveText(before);
+
+  // The search rail filters the case list.
+  await page.locator("[data-sim-search]").fill("fraud");
+  await expect(page.locator("[data-case]")).toHaveCount(2);
 });
 
 test("activity health demo recalculates every view from fictional configuration", async ({ page }) => {

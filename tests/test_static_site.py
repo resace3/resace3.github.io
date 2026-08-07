@@ -11,6 +11,7 @@ STATIC_PAGES = [
     ROOT / "causal-dag.html",
     ROOT / "agentic-prompt.html",
     ROOT / "activity-health-demo.html",
+    ROOT / "business-simulation-cases.html",
 ]
 
 
@@ -77,16 +78,38 @@ def test_activity_health_demo_has_synthetic_data_disclosure_and_local_assets():
     assert "Day comparison" not in html
 
 
-def test_new_projects_page_shows_three_equal_bubble_cards():
+def test_new_projects_page_shows_four_equal_bubble_cards():
     html = (ROOT / "new-projects.html").read_text(encoding="utf-8")
     css = (ROOT / "style.css").read_text(encoding="utf-8")
 
-    assert html.count('class="new-project-card') == 3
+    assert html.count('class="new-project-card') == 4
     assert 'href="activity-health-demo.html"' in html
     assert "Activity Health Insights" in html
+    assert 'href="business-simulation-cases.html"' in html
+    assert "Business Simulation Cases" in html
     assert 'href="style.css?v=20260720.4"' in html
     assert "grid-template-columns: repeat(3, minmax(0, 1fr));" in css
     assert ".health-bubble {\n  --bubble-color: #6d5dfc;\n}" in css
+    assert ".sim-bubble {\n  --bubble-color: #0ea5e9;\n}" in css
+    # Four cards sit in a 2x2 block only above the single-column breakpoint.
+    assert "@media (min-width: 981px) {" in css
+
+
+def test_business_simulation_cases_page_is_self_contained():
+    html = (ROOT / "business-simulation-cases.html").read_text(encoding="utf-8")
+    script = (ROOT / "business-simulation-cases.js").read_text(encoding="utf-8")
+
+    assert 'href="business-simulation-cases.css?v=20260806.1"' in html
+    assert 'src="business-simulation-cases.js?v=20260806.1"' in html
+    assert "Fictional companies and synthetic data generated in your browser" in html
+    assert "https://github.com/resace3/Simulation_Cases_book" in html
+
+    # One case per notebook in the source repository.
+    assert script.count("    {\n      id: \"ch") == 18
+    # Nothing may leave the browser.
+    assert "fetch(" not in script
+    assert "XMLHttpRequest" not in script
+    assert "localStorage" not in script
 
 
 def test_new_projects_decorations_and_mobile_header_stay_in_viewport():
@@ -130,7 +153,13 @@ def test_page_transition_state_is_cleared_for_history_restores():
     assert "window.clearTimeout(transitionNavigationTimer);" in script
     assert 'document.body.classList.contains("page-transition-out")' in script
 
-    for page_name in ["index.html", "new-projects.html", "agentic-prompt.html", "activity-health-demo.html"]:
+    for page_name in [
+        "index.html",
+        "new-projects.html",
+        "agentic-prompt.html",
+        "activity-health-demo.html",
+        "business-simulation-cases.html",
+    ]:
         html = (ROOT / page_name).read_text(encoding="utf-8")
         assert 'src="script.js?v=20260720.1"' in html
 

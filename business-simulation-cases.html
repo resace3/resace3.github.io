@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interactive explorer for the Business Simulation Cases notebooks by Nick Rezaee: eighteen fictional company cases with data-generating processes you can retune in the browser.">
+  <title>Business Simulation Cases | Nick Rezaee</title>
+  <link rel="stylesheet" href="style.css?v=20260806.1">
+  <link rel="stylesheet" href="business-simulation-cases.css?v=20260806.1">
+</head>
+<body class="sim-cases-page">
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary navigation">
+      <div class="brand-group">
+        <a class="brand" href="index.html" aria-label="Nick Rezaee home">Nick Rezaee</a>
+        <a class="new-projects-badge" href="new-projects.html">New Projects</a>
+      </div>
+      <div class="nav-links">
+        <a href="index.html#experience">Experience</a>
+        <a href="index.html#skills">Skills</a>
+        <a href="index.html#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="sim-shell" data-sim-cases>
+    <section class="demo-disclosure" aria-label="Demo disclosure">
+      <div>
+        <span class="demo-disclosure-dot" aria-hidden="true"></span>
+        <strong>Interactive case explorer</strong>
+        <span>Fictional companies and synthetic data generated in your browser</span>
+      </div>
+      <a href="https://github.com/resace3/Simulation_Cases_book" target="_blank" rel="noreferrer">View source notebooks</a>
+    </section>
+
+    <section class="sim-app" aria-labelledby="sim-cases-title">
+      <header class="sim-app-header">
+        <span class="sim-logo" aria-hidden="true">
+          <svg viewBox="0 0 32 32"><path d="M5 26V13m7 13V6m7 20v-9m7 9V10" /></svg>
+        </span>
+        <div class="sim-app-heading">
+          <h1 id="sim-cases-title">Business Simulation Cases</h1>
+          <p>Eighteen teaching cases, each with a data-generating process you can retune and re-run</p>
+        </div>
+        <span class="demo-ready-status"><i aria-hidden="true"></i> <span data-sim-status>Loading cases</span></span>
+      </header>
+
+      <div class="sim-body">
+        <aside class="sim-rail" aria-label="Case library">
+          <div class="sim-rail-head">
+            <label class="sim-search">
+              <span class="sr-only">Search cases</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" /><path d="m16 16 4 4" /></svg>
+              <input type="search" data-sim-search placeholder="Search cases or methods" autocomplete="off">
+            </label>
+          </div>
+          <div class="sim-rail-list" data-sim-list role="tablist" aria-orientation="vertical" aria-label="Simulation cases"></div>
+        </aside>
+
+        <section class="sim-detail" data-sim-detail></section>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js?v=20260720.1"></script>
+  <script src="business-simulation-cases.js?v=20260806.1"></script>
+</body>
+</html>
