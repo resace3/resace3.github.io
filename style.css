@@ -789,6 +789,10 @@ h3 {
   --bubble-color: #0ea5e9;
 }
 
+.twin-bubble {
+  --bubble-color: #2563eb;
+}
+
 .bubble-orbit {
   position: absolute;
   right: 28px;
@@ -1176,6 +1180,100 @@ h3 {
 @keyframes simBarPulse {
   0%, 100% { transform: scaleY(0.92); transform-origin: bottom; opacity: 0.82; }
   50% { transform: scaleY(1); opacity: 1; }
+}
+
+/* Model Twin Randomization: an assigned trial calendar on the left, the two
+   outcome distributions it produces on the right, and the gap between them. */
+.twin-bubble-visual {
+  width: min(100%, 410px);
+  height: 176px;
+  padding: 18px;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 18px 48px rgba(23, 74, 148, 0.14);
+}
+
+.twin-mini-cal {
+  position: absolute;
+  top: 26px;
+  left: 20px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 15px;
+  gap: 3px;
+  width: 126px;
+}
+
+.twin-mini-cal i {
+  border: 1px solid rgba(14, 116, 144, 0.35);
+  border-radius: 3px;
+  background: rgba(6, 182, 212, 0.16);
+  animation: twinCellFlip 5.2s ease-in-out infinite;
+}
+
+.twin-mini-cal i.a {
+  border-color: rgba(180, 83, 9, 0.4);
+  background: rgba(217, 119, 6, 0.22);
+}
+
+.twin-mini-cal i:nth-child(3n) { animation-delay: 0.35s; }
+.twin-mini-cal i:nth-child(3n + 1) { animation-delay: 0.7s; }
+
+.twin-mini-curve {
+  position: absolute;
+  right: 18px;
+  bottom: 34px;
+  left: 168px;
+  height: 96px;
+  pointer-events: none;
+}
+
+.twin-mini-curve svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke-linecap: round;
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.twin-mini-curve .c1 {
+  stroke: #b45309;
+  opacity: 0.75;
+}
+
+.twin-mini-curve .c2 {
+  stroke: #0e7490;
+  stroke-dasharray: 7 4;
+  opacity: 0.75;
+}
+
+.twin-mini-gap {
+  position: absolute;
+  top: 34px;
+  right: 44px;
+  left: 196px;
+  height: 0;
+  border-top: 2px dashed rgba(37, 99, 235, 0.75);
+}
+
+.twin-mini-dot {
+  position: absolute;
+  bottom: 30px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.22);
+}
+
+.twin-mini-dot.d1 { left: 190px; background: #b45309; }
+.twin-mini-dot.d2 { left: 254px; background: #0e7490; }
+
+@keyframes twinCellFlip {
+  0%, 44%, 100% { opacity: 1; }
+  22% { opacity: 0.42; }
 }
 
 .new-project-card h3 {

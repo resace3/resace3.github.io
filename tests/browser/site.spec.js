@@ -112,9 +112,23 @@ test("new projects page links to all interactive app concepts", async ({ page })
 
   await expect(page.getByRole("heading", { name: "Open Source Apps" })).toBeVisible();
   await expect(page.getByRole("link", { name: /Causal DAG Builder/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Agentic Prompt App/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Model Twin Randomization/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /Activity Health Insights/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /Business Simulation Cases/ })).toBeVisible();
+});
+
+test("model twin card opens the scrollytelling explainer", async ({ page }) => {
+  await page.goto("/new-projects.html");
+
+  await page
+    .getByRole("link", { name: "Read the Model Twin Randomization interactive explainer" })
+    .click();
+  await page.waitForURL(/\/motr\/$/);
+
+  await expect(page).toHaveTitle(/Model Twin Randomization/);
+  // The explainer is scroll-driven: every chapter registers its own steps, so a
+  // healthy build has all of them mounted.
+  await expect(page.locator("[data-step-index]")).toHaveCount(84);
 });
 
 test("project history navigation restores a clean New Projects page", async ({ page }) => {
