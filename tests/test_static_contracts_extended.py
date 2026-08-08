@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 @pytest.mark.parametrize(
     "page_name",
-    ["index.html", "new-projects.html", "causal-dag.html", "agentic-prompt.html", "activity-health-demo.html"],
+    ["index.html", "new-projects.html", "causal-dag.html", "activity-health-demo.html"],
 )
 def test_static_pages_keep_personal_site_navigation(page_name):
     html = (ROOT / page_name).read_text(encoding="utf-8")
@@ -106,18 +106,6 @@ def test_architecture_diagram_uses_capitalized_meds_label():
     assert ">Meds<" in html
     assert "VA EHR" not in html
     assert ">meds<" not in html
-
-
-def test_agentic_prompt_development_pill_is_large_red_and_links_to_github():
-    html = (ROOT / "agentic-prompt.html").read_text(encoding="utf-8")
-    css = (ROOT / "agentic-prompt.css").read_text(encoding="utf-8")
-
-    assert 'href="https://github.com/resace3/Agentic_Prompt_App"' in html
-    assert "Still in development: view on GitHub" in html
-    assert ".dev-note" in css
-    assert "font-size: 1.8rem" in css
-    assert "font-weight: 900" in css
-    assert "rgba(225, 29, 72" in css
 
 
 def test_static_causal_dag_advanced_controls_stay_under_closed_advanced_toggle():

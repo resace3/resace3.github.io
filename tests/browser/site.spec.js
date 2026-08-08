@@ -251,19 +251,6 @@ test("activity health demo recalculates every view from fictional configuration"
   expect(reset.risk).toBeCloseTo(initial.risk, 8);
 });
 
-test("agentic prompt page renders the static prompt animation", async ({ page }) => {
-  await page.goto("/agentic-prompt.html");
-
-  await expect(page.getByRole("heading", { name: "Agentic Prompt App" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Still in development: view on GitHub" })).toBeVisible();
-  await expect(page.locator(".typed-line")).toHaveAttribute(
-    "aria-label",
-    "Create health plots for sleep duration, steps, and mood over the last 90 days."
-  );
-  await expect(page.getByRole("heading", { name: "Sleep Health Plots" })).toBeVisible();
-  await expect(page.getByText("Generated Notes")).toBeVisible();
-});
-
 test("causal DAG app is served through the personal site proxy", async ({ page }) => {
   await page.goto("/causal-dag.html", { waitUntil: "domcontentloaded" });
 

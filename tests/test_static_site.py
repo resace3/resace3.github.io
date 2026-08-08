@@ -9,7 +9,6 @@ STATIC_PAGES = [
     ROOT / "index.html",
     ROOT / "new-projects.html",
     ROOT / "causal-dag.html",
-    ROOT / "agentic-prompt.html",
     ROOT / "activity-health-demo.html",
     ROOT / "business-simulation-cases.html",
 ]
@@ -87,7 +86,9 @@ def test_new_projects_page_shows_four_equal_bubble_cards():
     assert "Activity Health Insights" in html
     assert 'href="business-simulation-cases.html"' in html
     assert "Business Simulation Cases" in html
-    assert 'href="style.css?v=20260720.4"' in html
+    assert 'href="motr/"' in html
+    assert "Model Twin Randomization" in html
+    assert 'href="style.css?v=20260807.1"' in html
     assert "grid-template-columns: repeat(3, minmax(0, 1fr));" in css
     assert ".health-bubble {\n  --bubble-color: #6d5dfc;\n}" in css
     assert ".sim-bubble {\n  --bubble-color: #0ea5e9;\n}" in css
@@ -116,7 +117,7 @@ def test_new_projects_decorations_and_mobile_header_stay_in_viewport():
     html = (ROOT / "new-projects.html").read_text(encoding="utf-8")
     css = (ROOT / "style.css").read_text(encoding="utf-8")
 
-    assert 'href="style.css?v=20260720.4"' in html
+    assert 'href="style.css?v=20260807.1"' in html
 
     orb_rule = css.split(".new-projects-hero::before {", 1)[1].split("}", 1)[0]
     assert "right: 0;" in orb_rule
@@ -156,7 +157,6 @@ def test_page_transition_state_is_cleared_for_history_restores():
     for page_name in [
         "index.html",
         "new-projects.html",
-        "agentic-prompt.html",
         "activity-health-demo.html",
         "business-simulation-cases.html",
     ]:
