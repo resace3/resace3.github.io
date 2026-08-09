@@ -103,7 +103,7 @@ test("home page renders the personal site", async ({ page }) => {
 
   await expect(page).toHaveTitle(/Nick Rezaee/);
   await expect(page.getByRole("link", { name: "Nick Rezaee home" })).toBeVisible();
-  await expect(page.getByText("Biomedical Data")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Software\s*Programmer/ })).toBeVisible();
   await expect(page.getByRole("link", { name: "New Projects" }).first()).toBeVisible();
 });
 
